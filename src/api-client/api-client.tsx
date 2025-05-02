@@ -1,0 +1,38 @@
+// src/apiService.ts
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:3001'; // Adjust the base URL as needed
+
+export interface DeclineCurveParams {
+  excel_file: string;
+  selected_wells: string[];
+  forecast_days: number;
+  selected_models: string[];
+}
+
+export interface TypeWellParams {
+  // excel_file: string;
+  selected_wells: string[];
+  selected_models: string[];
+}
+
+export const declineCurveAnalysis = async (params: DeclineCurveParams) => {
+  try {
+    console.log(params,"params")
+    const response = await axios.post(`${API_BASE_URL}/decline_curve_analysis`, { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error during decline curve analysis:', error);
+    throw error;
+  }
+};
+
+export const typeWellAnalysis = async (params: any) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/type_well_analysis`, params );
+    return response.data;
+  } catch (error) {
+    console.error('Error during type well analysis:', error);
+    throw error;
+  }
+};
