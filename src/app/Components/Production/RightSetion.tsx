@@ -142,7 +142,7 @@ export const RightSection: React.FC<RightSectionProps> = ({ dataTabel }) => {
           </TabsContent>
 
           <TabsContent value="chart">
-            <OilProductionChart  dataTabel={dataTabel} filterData={true}/>
+            <OilProductionChart  dataTabel={dataTabel}  filterData={true}/>
           </TabsContent>
         </Tabs>
       </div>

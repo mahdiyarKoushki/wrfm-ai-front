@@ -1,5 +1,34 @@
 "use client"
 
+interface CostData {
+  P10: { [key: string]: number };
+  P50: { [key: string]: number };
+  P90: { [key: string]: number };
+}
+
+interface ConvertedEntry {
+  P10: number | null;
+  P50: number | null;
+  P90: number | null;
+}
+
+interface ConvertedDataEntry {
+  P10: number | null;
+  P50: number | null;
+  P90: number | null;
+}
+
+interface DataTabelEntry {
+  Date: string;
+  Choke: number | string;
+  BSTP: number | string;
+  WHP: number | string | null;
+  Oil: number | string;
+}
+
+type CombinedEntry = ConvertedDataEntry & DataTabelEntry;
+
+
 import { useState, useEffect } from "react"
 import { ArrowLeft } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
@@ -9,7 +38,7 @@ import { Label } from "../ui/label"
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group"
 import WellProductionChart from "./well-production-chart"
 import { generateWellData } from "../../libo/generate-data"
-import MuiStyleWellSelect from "./mui-style-well-select"
+import MuiStyleWellSelect, { Well } from "./mui-style-well-select"
 import { Button } from "../ui/button"
 import { useRouter } from "next/navigation"
 import { Header } from "../Header"
@@ -20,7 +49,14 @@ import { declineCurveAnalysis, DeclineCurveParams, typeWellAnalysis, TypeWellPar
 export default function TypeWellAnalysis() {
   const router = useRouter()
   const [wellData, setWellData] = useState<any[]>([])
-  const [selectedModel, setSelectedModel] = useState("exponential")
+  const [selectedModel, setSelectedModel] = useState("Exponential")
+  const [dataTabel, setdataTabel] = useState<any[]>(() => {
+    const storedTableData = localStorage.getItem("dataTabel");
+    return storedTableData ? JSON.parse(storedTableData) : [];
+  });
+  useEffect(() => {
+    localStorage.setItem("dataTabel", JSON.stringify(dataTabel));
+  }, [dataTabel]);
 
 
   // const toggleModel = (model: keyof typeof selectedModels) => {
@@ -34,11 +70,7 @@ export default function TypeWellAnalysis() {
     D: "0",
     b: "auto",
   })
-  const [optimalParams, setOptimalParams] = useState({
-    qi: "0.1",
-    D: "0",
-    b: "3",
-  })
+
   const [metrics, setMetrics] = useState({
     P10: { MAE: "0.73", RMSE: "0.95", MAPE: "0.25" },
     P50: { MAE: "0.73", RMSE: "0.95", MAPE: "0.25" },
@@ -54,28 +86,17 @@ export default function TypeWellAnalysis() {
 
   const [results, setResults] = useState<any>(null);
 
-  const handleDeclineCurveAnalysis = async () => {
-    const params: DeclineCurveParams = {
-      excel_file: `D:\wrfm-api\Models\Well_Production_Data.xlsx`, // Replace with your actual file path
-      selected_wells: ['SPH-02', 'SPH-03'], // Example well list
-      forecast_days: 180,
-      selected_models: ['Exponential', 'Hyperbolic']
-    };
-
-    try {
-      const data = await declineCurveAnalysis(params);
-      setResults(data);
-    } catch (error) {
-      console.error('An error occurred:', error);
-      setResults('Error fetching decline curve analysis');
-    }
-  };
+ 
+  const [selectedWells, setSelectedWells] = useState<Well[]>([
+    { value: "SPH-02", label: "SPH-02" },
+    { value: "SPH-03", label: "SPH-03" },
+    { value: "SPH-04", label: "SPH-04" },
+  ])
 
   const handleTypeWellAnalysis = async () => {
     const params: TypeWellParams = {
-      // excel_file: 'D:\\wrfm-api\\Models\\Well_Production_Data.xlsx', // Replace with your actual file path
-      selected_wells: ['SPH-02', 'SPH-03','SPH-04'],
-      selected_models: ['Exponential', 'Hyperbolic']
+      selected_wells: selectedWells.map(item=>item.value),
+      selected_models: [selectedModel]
     };
 
     try {
@@ -86,21 +107,60 @@ export default function TypeWellAnalysis() {
       setResults('Error fetching type well analysis');
     }
   };
-useEffect(() => {
-  handleTypeWellAnalysis()
-}, [])
-console.log({results});
 
+console.log(results?.percentile_curves );
+const costData: CostData =results?.percentile_curves
+const convertedData: ConvertedEntry[] = [];
+
+
+if (costData) {
+  const maxIndex = Math.max(
+    Object.keys(costData?.P10).length,
+    Object.keys(costData?.P50).length,
+    Object.keys(costData?.P90).length
+  );
+  
+  // Loop through each index to create an entry
+  for (let i = 0; i < maxIndex; i++) {
+    const entry: ConvertedEntry = {
+      P10: costData?.P10[String(i)] ?? null,
+      P50: costData?.P50[String(i)] ?? null,
+      P90: costData?.P90[String(i)] ?? null,
+    };
+    convertedData.push(entry);
+  }
+  
+  
+}
+
+
+
+
+const minLength = Math.min(convertedData.length, dataTabel.length);
+
+// Combine the arrays using the minimum length to avoid index out of bounds
+const combinedData: CombinedEntry[] = [];
+
+for (let i = 0; i < minLength; i++) {
+  combinedData.push({
+    ...convertedData[i],
+    ...dataTabel[i],
+  });
+}
+
+console.log(combinedData);
 
 
   const handleRunAnalysis = () => {
     // Simulate analysis by updating optimal parameters
-    setOptimalParams({
-      qi: "0.1",
-      D: "0",
-      b: "3",
-    })
+    // setOptimalParams({
+    //   qi: "0.1",
+    //   D: "0",
+    //   b: "3",
+    // })
+    handleTypeWellAnalysis()
   }
+  
 
   return (
     <div className="container mx-auto  px-4">
@@ -111,31 +171,22 @@ console.log({results});
         <div className="space-y-6">
           <div>
             <h2 className="text-sm font-medium mb-2">Well Select</h2>
-            <MuiStyleWellSelect />
+            <MuiStyleWellSelect selectedWells={selectedWells} setSelectedWells={setSelectedWells} />
           </div>
 
           <div>
             <h2 className="text-sm font-medium mb-2">Model Selection</h2>
+  
           
             <div className="grid grid-cols-2 gap-2">
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="exponential"
-                  checked={selectedModel === "exponential"}
-                  onCheckedChange={() => setSelectedModel("exponential")}
+                  id="Exponential"
+                  checked={selectedModel === "Exponential"}
+                  onCheckedChange={() => setSelectedModel("Exponential")}
                 />
-                <Label htmlFor="exponential" className="text-sm">
+                <Label htmlFor="Exponential" className="text-sm">
                   ARPS: Exponential
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="Harmonic"
-                  checked={selectedModel === "Harmonic"}
-                  onCheckedChange={() => setSelectedModel("Harmonic")}
-                />
-                <Label htmlFor="Harmonic" className="text-sm">
-                  ARPS: Harmonic
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
@@ -150,41 +201,51 @@ console.log({results});
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="extended"
-                  checked={selectedModel === "extended"}
-                  onCheckedChange={() => setSelectedModel("extended")}
+                  id="Harmonic"
+                  checked={selectedModel === "Harmonic"}
+                  onCheckedChange={() => setSelectedModel("Harmonic")}
                 />
-                <Label htmlFor="extended" className="text-sm">
-                  Extended Exponential
+                <Label htmlFor="Harmonic" className="text-sm">
+                  ARPS: Harmonic
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="logistic"
-                  checked={selectedModel === "logistic"}
-                  onCheckedChange={() => setSelectedModel("logistic")}
+                  id="StretchedExp"
+                  checked={selectedModel === "StretchedExp"}
+                  onCheckedChange={() => setSelectedModel("StretchedExp")}
                 />
-                <Label htmlFor="logistic" className="text-sm">
+                <Label htmlFor="StretchedExp" className="text-sm">
+                Extended Exponential
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="Logistic"
+                  checked={selectedModel === "Logistic"}
+                  onCheckedChange={() => setSelectedModel("Logistic")}
+                />
+                <Label htmlFor="Logistic" className="text-sm">
                   Logistic Growth Model
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="modified"
-                  checked={selectedModel === "modified"}
-                  onCheckedChange={() => setSelectedModel("modified")}
+                  checked={selectedModel === "ModifiedDCA"}
+                  onCheckedChange={() => setSelectedModel("ModifiedDCA")}
                 />
-                <Label htmlFor="modified" className="text-sm">
+                <Label htmlFor="ModifiedDCA" className="text-sm">
                   Modified DCA (Transition Decline Rate)
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="power"
-                  checked={selectedModel === "power"}
-                  onCheckedChange={() => setSelectedModel("power")}
+                  id="PowerLaw"
+                  checked={selectedModel === "PowerLaw"}
+                  onCheckedChange={() => setSelectedModel("PowerLaw")}
                 />
-                <Label htmlFor="power" className="text-sm">
+                <Label htmlFor="PowerLaw" className="text-sm">
                   Power Law
                 </Label>
               </div>
@@ -303,7 +364,7 @@ console.log({results});
               <TabsContent value="history" className="pt-4">
              
                 <div className="h-[400px]">
-                <WellProductionChart data={wellData}  title="Well Histories with Percentiles"/>
+                <WellProductionChart data={combinedData}  title="Well Histories with Percentiles"/>
 
                 </div>
               </TabsContent>

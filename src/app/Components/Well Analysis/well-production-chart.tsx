@@ -11,6 +11,7 @@ interface WellProductionChartProps {
 export default function WellProductionChart({ data ,title}: WellProductionChartProps) {
   const [chartWidth, setChartWidth] = useState(0)
   const chartRef = useRef<HTMLDivElement>(null)
+  
 
   useEffect(() => {
     if (chartRef.current) {
@@ -47,7 +48,7 @@ export default function WellProductionChart({ data ,title}: WellProductionChartP
                     />
                     <p className="font-medium">{displayName}:</p>
                   </div>
-                  <p className="font-mono font-bold">{`${entry.value.toFixed(0)} bbl/day`}</p>
+                  <p className="font-mono font-bold">{`${entry?.value ?? ""} `}</p>
                 </div>
               )
             })}
@@ -64,13 +65,13 @@ export default function WellProductionChart({ data ,title}: WellProductionChartP
 
     // Group items for better organization
     const legendItems = [
-      { id: "range", name: "P10 - P90 Range", type: "rect", color: "#f0f0f0" },
-      { id: "p10Fit", name: "P10 - Exponential Fit", type: "line", color: "#0088ff", dashed: true },
-      { id: "p50", name: "P50 (Median)", type: "line", color: "#0000ff" },
-      { id: "p50Fit", name: "P50 - Exponential Fit", type: "line", color: "#ff8800", dashed: true },
-      { id: "p10", name: "P10 (Low Case)", type: "line", color: "#ff0000", dashed: true },
-      { id: "p90Fit", name: "P90 - Exponential Fit", type: "line", color: "#00cc00", dashed: true },
-      { id: "p90", name: "P90 (High Case)", type: "line", color: "#00aa00", dashed: true },
+      { id: "Oil", name: "P10 - P90 Range", type: "rect", color: "#f0f0f0" },
+      { id: "P10", name: "P10 - Exponential Fit", type: "line", color: "#0088ff", dashed: true },
+      { id: "P50", name: "P50 (Median)", type: "line", color: "#0000ff" },
+      { id: "P90", name: "P50 - Exponential Fit", type: "line", color: "#ff8800", dashed: true },
+      // { id: "p10", name: "P10 (Low Case)", type: "line", color: "#ff0000", dashed: true },
+      // { id: "p90Fit", name: "P90 - Exponential Fit", type: "line", color: "#00cc00", dashed: true },
+      // { id: "p90", name: "P90 (High Case)", type: "line", color: "#00aa00", dashed: true },
     ]
 
     return (
@@ -110,9 +111,9 @@ export default function WellProductionChart({ data ,title}: WellProductionChartP
             bottom: 5,
           }}
         >
-          <CartesianGrid strokeDasharray="3 3" />
+          {/* <CartesianGrid strokeDasharray="3 3" /> */}
           <XAxis
-            dataKey="day"
+            // dataKey="day"
             label={{
               value: "Production Days",
               position: "insideBottom",
@@ -127,7 +128,7 @@ export default function WellProductionChart({ data ,title}: WellProductionChartP
               position: "insideLeft",
               style: { textAnchor: "middle" },
             }}
-            domain={[2500, 6500]}
+            // domain={[2500, 6500]}
           />
           <Tooltip content={<CustomTooltip />} />
 
@@ -139,7 +140,7 @@ export default function WellProductionChart({ data ,title}: WellProductionChartP
             </linearGradient>
           </defs>
 
-          <Area
+          {/* <Area
             type="monotone"
             dataKey="range"
             stroke="none"
@@ -147,21 +148,30 @@ export default function WellProductionChart({ data ,title}: WellProductionChartP
             fillOpacity={0.5}
             activeDot={false}
             isAnimationActive={false}
-          />
+          /> */}
 
           {/* Lines */}
           <Line
             type="monotone"
-            dataKey="p10"
-            stroke="#ff0000"
+            dataKey="Oil"
+            stroke="yellow"
             strokeDasharray="3 3"
             dot={false}
-            name="P10 (Low Case)"
+            name="Oil"
             isAnimationActive={false}
           />
           <Line
             type="monotone"
-            dataKey="p50"
+            dataKey="P10"
+            stroke="red"
+            dot={false}
+            name="P10"
+            strokeWidth={1.5}
+            isAnimationActive={false}
+          />
+          <Line
+            type="monotone"
+            dataKey="P50"
             stroke="#0000ff"
             dot={false}
             name="P50 (Median)"
@@ -170,40 +180,14 @@ export default function WellProductionChart({ data ,title}: WellProductionChartP
           />
           <Line
             type="monotone"
-            dataKey="p90"
+            dataKey="P90"
             stroke="#00aa00"
             strokeDasharray="3 3"
             dot={false}
             name="P90 (High Case)"
             isAnimationActive={false}
           />
-          <Line
-            type="monotone"
-            dataKey="p10Fit"
-            stroke="#0088ff"
-            strokeDasharray="2 2"
-            dot={false}
-            name="P10 - Exponential Fit"
-            isAnimationActive={false}
-          />
-          <Line
-            type="monotone"
-            dataKey="p50Fit"
-            stroke="#ff8800"
-            strokeDasharray="2 2"
-            dot={false}
-            name="P50 - Exponential Fit"
-            isAnimationActive={false}
-          />
-          <Line
-            type="monotone"
-            dataKey="p90Fit"
-            stroke="#00cc00"
-            strokeDasharray="2 2"
-            dot={false}
-            name="P90 - Exponential Fit"
-            isAnimationActive={false}
-          />
+      
 
           <Legend content={<CustomLegend />} />
         </LineChart>

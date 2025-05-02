@@ -7,20 +7,34 @@ import { Input } from "../ui/input"
 import { Label } from "../ui/label"
 import { generateWellData } from "../../libo/generate-data"
 import { Button } from "../ui/button"
-import WellProductionChart from "../Well Analysis/well-production-chart"
+
 import { Checkbox } from "../ui/checkbox"
 
 import { FormControl, MenuItem, Select, SelectChangeEvent } from "@mui/material"
 import { useRouter } from "next/navigation"
 import ModelParametersModal from "./model-parameters-modal"
 import { Header } from "../Header"
+import { wells } from "../Well Analysis/mui-style-well-select"
+import { declineCurveAnalysis, DeclineCurveParams, typeWellAnalysis } from "@/api-client/api-client"
+import WellProductionChart from "./well-production-chart"
+
+export interface Well {
+  value: string
+  label: string
+}
+type handleChange = SelectChangeEvent<string>
+
 
 export default function DeclineCurveAnalysis() {
     const router = useRouter()
       const [well, setwell] = useState<string>('SPH-02');
+      const handleChange :  (Well:handleChange) => void = (Well)=>{
+        setwell(Well.target.value)
+      }
+      
   
       const [wellData, setWellData] = useState<any[]>([])
-      const [selectedModel, setSelectedModel] = useState("exponential")
+      const [selectedModel, setSelectedModel] = useState("Exponential")
       const [initialParams, setInitialParams] = useState({
         qi: "0",
         D: "0",
@@ -43,22 +57,37 @@ export default function DeclineCurveAnalysis() {
         setWellData(data)
       }, [])
     
-      const handleRunAnalysis = () => {
-        // Simulate analysis by updating optimal parameters
-        setOptimalParams({
-          qi: "200",
-        })
-      }
+    
+      const [results, setResults] = useState<any>(null);
     
       const handleCompareModels = () => {
         setIsModelModalOpen(true)
       }
-      // const toggleModel = (model: keyof typeof selectedModels) => {
-      //   setSelectedModels({
-      //     ...selectedModels,
-      //     [model]: !selectedModels[model],
-      //   })
-      // }
+      const handleDeclineAnalysis = async () => {
+        const params: DeclineCurveParams = {
+          forecast_days:Number(projectionDays),
+          selected_wells: [well],
+          selected_models: [selectedModel]
+        };
+    
+        try {
+          const data = await declineCurveAnalysis(params);
+          setResults(data);
+        } catch (error) {
+          console.error('An error occurred:', error);
+          setResults('Error fetching type well analysis');
+        }
+      };
+
+  
+    const handleRunAnalysis = () => {
+      handleDeclineAnalysis()
+     
+    }
+    console.log('====================================');
+    console.log(results && results.data[well] );
+    console.log('====================================');
+////fitted_parameters
     
   return (
     <div className="container mx-auto px-4">
@@ -76,12 +105,12 @@ export default function DeclineCurveAnalysis() {
         labelId="demo-select-small-label"
         id="demo-select-small"
         value={well}
-        // onChange={handleChange}
+        onChange={handleChange}
       >
+        {wells.map(item=><MenuItem value={item.value}>{item.label}</MenuItem>)}
        
-        <MenuItem value={"SPH-02"}>SPH-02</MenuItem>
-        <MenuItem value={"SPH-03"}>SPH-03</MenuItem>
-        <MenuItem value={"SPH-04"}>SPH-04</MenuItem>
+        
+       
       </Select>
     </FormControl>
           </div>
@@ -91,22 +120,12 @@ export default function DeclineCurveAnalysis() {
             <div className="grid grid-cols-2 gap-2">
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="exponential"
-                  checked={selectedModel === "exponential"}
-                  onCheckedChange={() => setSelectedModel("exponential")}
+                  id="Exponential"
+                  checked={selectedModel === "Exponential"}
+                  onCheckedChange={() => setSelectedModel("Exponential")}
                 />
-                <Label htmlFor="exponential" className="text-sm">
+                <Label htmlFor="Exponential" className="text-sm">
                   ARPS: Exponential
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="Harmonic"
-                  checked={selectedModel === "Harmonic"}
-                  onCheckedChange={() => setSelectedModel("Harmonic")}
-                />
-                <Label htmlFor="Harmonic" className="text-sm">
-                  ARPS: Harmonic
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
@@ -121,41 +140,51 @@ export default function DeclineCurveAnalysis() {
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="extended"
-                  checked={selectedModel === "extended"}
-                  onCheckedChange={() => setSelectedModel("extended")}
+                  id="Harmonic"
+                  checked={selectedModel === "Harmonic"}
+                  onCheckedChange={() => setSelectedModel("Harmonic")}
                 />
-                <Label htmlFor="extended" className="text-sm">
-                  Extended Exponential
+                <Label htmlFor="Harmonic" className="text-sm">
+                  ARPS: Harmonic
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="logistic"
-                  checked={selectedModel === "logistic"}
-                  onCheckedChange={() => setSelectedModel("logistic")}
+                  id="StretchedExp"
+                  checked={selectedModel === "StretchedExp"}
+                  onCheckedChange={() => setSelectedModel("StretchedExp")}
                 />
-                <Label htmlFor="logistic" className="text-sm">
+                <Label htmlFor="StretchedExp" className="text-sm">
+                Extended Exponential
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="Logistic"
+                  checked={selectedModel === "Logistic"}
+                  onCheckedChange={() => setSelectedModel("Logistic")}
+                />
+                <Label htmlFor="Logistic" className="text-sm">
                   Logistic Growth Model
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="modified"
-                  checked={selectedModel === "modified"}
-                  onCheckedChange={() => setSelectedModel("modified")}
+                  checked={selectedModel === "ModifiedDCA"}
+                  onCheckedChange={() => setSelectedModel("ModifiedDCA")}
                 />
-                <Label htmlFor="modified" className="text-sm">
+                <Label htmlFor="ModifiedDCA" className="text-sm">
                   Modified DCA (Transition Decline Rate)
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="power"
-                  checked={selectedModel === "power"}
-                  onCheckedChange={() => setSelectedModel("power")}
+                  id="PowerLaw"
+                  checked={selectedModel === "PowerLaw"}
+                  onCheckedChange={() => setSelectedModel("PowerLaw")}
                 />
-                <Label htmlFor="power" className="text-sm">
+                <Label htmlFor="PowerLaw" className="text-sm">
                   Power Law
                 </Label>
               </div>
@@ -317,7 +346,7 @@ export default function DeclineCurveAnalysis() {
             </div>
             <div className="h-[400px]">
               <p className="text-xs text-center mb-1">Type Well Analysis - Exponential Fits</p>
-              <WellProductionChart data={wellData} />
+              <WellProductionChart data={results ? results.data[well].historical_data:[] } />
             </div>
           </div>
 

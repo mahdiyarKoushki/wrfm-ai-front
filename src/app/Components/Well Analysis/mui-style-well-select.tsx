@@ -5,25 +5,34 @@ import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import { X, Check, ChevronDown } from "lucide-react"
 
-interface Well {
+export interface Well {
   value: string
   label: string
 }
 
-const wells: Well[] = [
-  { value: "sph-01", label: "SPH-01" },
-  { value: "sph-02", label: "SPH-02" },
-  { value: "sph-03", label: "SPH-03" },
-  { value: "sph-04", label: "SPH-04" },
-  { value: "sph-05", label: "SPH-05" },
+interface propsSelect {
+  selectedWells:Well[],
+   setSelectedWells:React.Dispatch<React.SetStateAction<Well[]>>
+}
+
+ export const wells: Well[] = [
+  {value: "SPH-01", label: "SPH-01"},
+  {value: "JR-06", label: "JR-06"},
+  {value: "JR-07", label: "JR-07"},
+  {value: "SPH-02", label: "SPH-02"},
+  {value: "SPH-03", label: "SPH-03"},
+  {value: "SPH-04", label: "SPH-04"},
+  {value: "SPH-05", label: "SPH-05"},
+  {value: "SPH-06", label: "SPH-06"},
+  {value: "SPH-07", label: "SPH-07"},
+  {value: "SPH-08", label: "SPH-08"},
+  {value: "SPH-09", label: "SPH-09"},
 ]
 
-export default function MuiStyleWellSelect() {
+
+export default function MuiStyleWellSelect({selectedWells, setSelectedWells}:propsSelect) {
   const [open, setOpen] = useState(false)
-  const [selectedWells, setSelectedWells] = useState<Well[]>([
-    { value: "sph-02", label: "SPH-02" },
-    { value: "sph-03", label: "SPH-03" },
-  ])
+
   const [searchTerm, setSearchTerm] = useState("")
   const dropdownRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)

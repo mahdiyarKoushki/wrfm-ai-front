@@ -18,7 +18,6 @@ interface ModelCardProps {
 export const LeftSetion: React.FC<any> = ({jsonExel, setjsonExel,dataTabel, setdataTabel}) => {
 
 
-
   useEffect(() => {
     localStorage.setItem("jsonExel", JSON.stringify(jsonExel));
   }, [jsonExel]);

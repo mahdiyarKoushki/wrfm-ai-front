@@ -59,7 +59,7 @@ const OilProductionChart: React.FC<RightSectionProps> = ({ dataTabel ,filterData
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-4 items-center">
+      {filterData ? <div className="flex flex-wrap gap-4 items-center">
         <DatePickerValue label="Start Date" setValue={setStartDate} value={startDate} />
         <DatePickerValue label="End Date" setValue={setEndDate} value={endDate} />
 
@@ -77,7 +77,8 @@ const OilProductionChart: React.FC<RightSectionProps> = ({ dataTabel ,filterData
         >
           Reset
         </Button>
-      </div>
+      </div> :""
+      }
 
       <div className="h-[400px] w-full p-4">
         <ResponsiveContainer width="100%" height="100%">
