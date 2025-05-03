@@ -49,8 +49,11 @@ export default function TypeWellAnalysis() {
 
     const [Parameters, setParameters] = useState({});
     const [Analysis, setAnalysis] = useState({});
+    const [DataRrsultChart, setDataRrsultChart] = useState({});
     const fields = ["qi","D","b","K","a","n","D_lim","beta"];
-  
+  console.log('====================================');
+  console.log(DataRrsultChart);
+  console.log('====================================');
 
   // generate dummy well history on mount
   useEffect(() => {
@@ -82,6 +85,15 @@ export default function TypeWellAnalysis() {
       const analysis=data.evaluation_metrics[selectedModel]
       setAnalysis(analysis)
       setParameters(parameters)
+      const probabilistic= data.fitted_data_points[selectedModel]
+      const convertProbabilistic = Object.keys(probabilistic.P10)              // ["1.0","2.0",…, "728.0"]
+  .sort((a,b)=>parseFloat(a)-parseFloat(b))        // ensure numeric order
+  .map(k => ({
+    P10: probabilistic.P10[k],
+    P50: probabilistic.P50[k],
+    P90: probabilistic.P90[k]
+  }));
+      setDataRrsultChart(convertProbabilistic)
 
 
     } catch (err) {
@@ -118,9 +130,7 @@ export default function TypeWellAnalysis() {
     });
   }
 
-  console.log('====================================');
-  console.log(Analysis);
-  console.log('====================================');
+
 
   const handleRunAnalysis = () => {
     handleTypeWellAnalysis();
@@ -134,7 +144,7 @@ export default function TypeWellAnalysis() {
         <div className="space-y-6">
           {/* Well Select */}
           <div>
-            <h2 className="text-sm font-medium mb-2">Well Select</h2>
+            <h2 className=" font-bold mb-2">Well Select</h2>
             <MuiStyleWellSelect
               selectedWells={selectedWells}
               setSelectedWells={setSelectedWells}
@@ -143,7 +153,7 @@ export default function TypeWellAnalysis() {
 
           {/* Model Selection */}
           <div>
-            <h2 className="text-sm font-medium mb-2">Model Selection</h2>
+            <h2 className="font-bold mb-2">Model Selection</h2>
             <div className="grid grid-cols-2 gap-2">
               {[
                 "Exponential",
@@ -176,14 +186,14 @@ export default function TypeWellAnalysis() {
 
           {/* Initial Parameters */}
           <div>
-            <h2 className="text-sm font-medium mb-2">Initial Parameters</h2>
+            <h2 className="text-gray-400 font-bold mb-2">Initial Parameters</h2>
             <div className="grid grid-cols-3 gap-4">
               {["qi", "D", "b"].map((key) => (
                 <div key={key} className="space-y-1">
-                  <Label htmlFor={key} className="text-sm">
+                  <Label htmlFor={key} className="text-sm text-gray-300">
                     {key}
                   </Label>
-                  <Input
+                  <Input disabled
                     id={key}
                     value={initialParams[key]}
                     onChange={(e) =>
@@ -200,7 +210,7 @@ export default function TypeWellAnalysis() {
 
           {/* Optimal Parameters Table */}
           <div>
-            <p className="text-sm font-medium mb-2">Optimal Parameters</p>
+            <p className="text-gray-400 font-bold mb-2">Optimal Parameters</p>
             <div className="overflow-x-auto">
       <table className="w-full border-collapse">
         <thead>
@@ -255,7 +265,7 @@ export default function TypeWellAnalysis() {
         <div className="space-y-6">
           {/* Tabs for History / Result */}
           <div>
-            <h2 className="text-sm font-medium mb-2">Plot</h2>
+            <h2 className="text-gray-400 font-bold mb-2">Plot</h2>
             <Tabs defaultValue="history">
               <TabsList className="w-full grid grid-cols-2">
                 <TabsTrigger value="history">History</TabsTrigger>
@@ -271,7 +281,7 @@ export default function TypeWellAnalysis() {
               </TabsContent>
               <TabsContent value="result" className="pt-4">
                 <div className="h-[400px]">
-                  <OilProductionChart dataTabel={[]} filterData={false} />
+                 <WellProductionChart data={DataRrsultChart}  title=""/>
                 </div>
               </TabsContent>
             </Tabs>

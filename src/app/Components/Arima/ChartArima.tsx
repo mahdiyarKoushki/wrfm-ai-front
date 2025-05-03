@@ -2,6 +2,10 @@
 import React from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, ChartData, ChartOptions } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
+interface Tprop {
+  title:string,
+  dataChart?:any
+}
 
 ChartJS.register(
   CategoryScale,
@@ -14,14 +18,14 @@ ChartJS.register(
   Legend
 );
 
-const AcfChart: React.FC = () => {
+const AcfChart: React.FC<Tprop> = ({title,dataChart}) => {
   const data: ChartData<'bar' | 'line'> = {
     labels: Array.from({ length: 18 }, (_, i) => i.toString()),
     datasets: [
       {
         type: 'bar',
-        label: 'ACF Bars',
-        data: [1, 0.8, 0.6, 0.4, 0.2, -0.2, -0.4, -0.6, -0.8, -1, 0.7, 0.6, -0.3, -0.6, -1, 0.9, 0.5, 0.3],
+        // label: 'ACF Bars',
+        data: dataChart,
         borderColor: 'black',
         backgroundColor: '#000',
         borderWidth: 0,
@@ -31,8 +35,8 @@ const AcfChart: React.FC = () => {
       },
       {
         type: 'line',
-        label: 'ACF Points',
-        data: [1, 0.8, 0.6, 0.4, 0.2, -0.2, -0.4, -0.6, -0.8, -1, 0.7, 0.6, -0.3, -0.6, -1, 0.9, 0.5, 0.3],
+        // label: 'ACF Points',
+        data: dataChart,
         borderColor: 'green',
         pointRadius: 6,
         pointBackgroundColor: 'green',
@@ -49,7 +53,7 @@ const AcfChart: React.FC = () => {
       },
       title: {
         display: true,
-        text: 'Autocorrelation (ACF)',
+        text:title,
       },
     },
     scales: {

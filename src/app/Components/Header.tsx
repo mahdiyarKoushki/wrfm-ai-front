@@ -9,7 +9,7 @@ interface Theader {
 export const Header:React.FC<Theader>=({title})=> {
    const router = useRouter()
   return (
-    <div className="flex justify-between items-center my-8">
+    <div className="flex justify-between items-center my-8 container mx-auto">
     <h1 className="text-xl font-semibold">{title}</h1>
     <Button  style={{cursor:"pointer"}} onClick={()=> router.push('/')} variant="ghost" size="sm" className="flex items-center gap-1">
       <ArrowLeft className="h-4 w-4" />

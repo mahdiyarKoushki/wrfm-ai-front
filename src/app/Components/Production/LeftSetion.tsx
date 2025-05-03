@@ -24,7 +24,7 @@ export const LeftSetion: React.FC<any> = ({jsonExel, setjsonExel,dataTabel, setd
 
   useEffect(() => {
     localStorage.setItem("dataTabel", JSON.stringify(dataTabel));
-  }, [dataTabel]);
+  }, [dataTabel,jsonExel]);
 
   const router = useRouter();
   const [well, setwell] = useState<string>("SPH-02");

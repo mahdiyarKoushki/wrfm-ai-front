@@ -70,7 +70,7 @@ export default function DeclineCurveAnalysis() {
       setParameters(data?.data[well].models[selectedModel].parameters)
       setdataRateChart(data?.data[well].models[selectedModel].forecast_rate)
       setdataCumulativeChart(data?.data[well].models[selectedModel].forecast_cumulative)
-      const probabilistic= data?.data[well].models[selectedModel].probabilistic_forecast_cumulative
+      const probabilistic= data?.data[well].models[selectedModel].probabilistic_forecast_rate
       const convertProbabilistic = Object.keys(probabilistic.P10)              // ["1.0","2.0",…, "728.0"]
   .sort((a,b)=>parseFloat(a)-parseFloat(b))        // ensure numeric order
   .map(k => ({
@@ -93,8 +93,6 @@ export default function DeclineCurveAnalysis() {
   };
 // const parameters= results[s].models selectedModel
 
-console.log('====================================');
-console.log(dataProbabilisticChart);
 
 
 
@@ -107,7 +105,7 @@ console.log(dataProbabilisticChart);
         <div className="space-y-6">
           {/** Well selector */}
           <div>
-            <h2 className="text-sm font-medium mb-2">Well Name</h2>
+            <h2 className=" font-bold mb-2">Well Name</h2>
             <FormControl sx={{ minWidth: 200, mt: "5px" }} size="small">
               <Select value={well} onChange={handleWellChange}>
                 {wells.map((item) => (
@@ -121,7 +119,7 @@ console.log(dataProbabilisticChart);
 
           {/** Model selection */}
           <div>
-            <h2 className="text-sm font-medium mb-2">Model Selection</h2>
+            <h2 className=" font-bold mb-2">Model Selection</h2>
             <div className="grid grid-cols-2 gap-2">
               {[
                 { id: "Exponential", label: "ARPS: Exponential" },
@@ -147,6 +145,7 @@ console.log(dataProbabilisticChart);
           </div>
 
           {/** Compare models button */}
+
           <div>
             <Button
               onClick={handleCompareModels}
@@ -162,16 +161,17 @@ console.log(dataProbabilisticChart);
           {/** Initial parameters inputs */}
           <div className="grid grid-cols-1 gap-6">
             <div>
-              <h2 className="text-sm font-medium text-gray-400 mb-2">
+              <h2 className="text-gray-400 font-bold mb-2">
                 Initial Parameters
               </h2>
               <div className="grid grid-cols-4 gap-x-10">
                 {["qi", "D", "b"].map((key) => (
                   <div key={key} className="space-y-1">
-                    <Label htmlFor={`initial-${key}`} className="text-sm">
+                    <Label  htmlFor={`initial-${key}`} className="text-sm text-gray-300">
                       {key}
                     </Label>
-                    <Input
+                    <Input 
+                    disabled
                       id={`initial-${key}`}
                       value={initialParams[key]}
                       onChange={(e) =>
@@ -275,7 +275,7 @@ console.log(dataProbabilisticChart);
         {/** Right panel */}
         <div className="space-y-6">
           <div>
-            <h2 className="text-sm font-medium mb-2">Plot</h2>
+            <h2 className="text-gray-400 font-bold mb-2">Plot</h2>
              <Tabs defaultValue="Rate">
                           <TabsList className="w-full grid grid-cols-3">
                             <TabsTrigger value="Rate">Rate</TabsTrigger>
