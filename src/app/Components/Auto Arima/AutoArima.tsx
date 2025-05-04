@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState, CSSProperties } from "react"
-import { PacmanLoader } from "react-spinners"
+import { MoonLoader, PacmanLoader } from "react-spinners"
 import { Header } from "../Header"
 import { Button } from "../ui/button"
 import { Label } from "../ui/label"
@@ -132,7 +132,8 @@ export default function AutoArima() {
       {/* === Loader Overlay === */}
       {loading && (
         <div className="absolute inset-0 z-50 bg-white bg-opacity-80 flex items-center justify-center">
-          <PacmanLoader
+          <MoonLoader
+
             color="#365ad8"
             loading={loading}
             cssOverride={override}
