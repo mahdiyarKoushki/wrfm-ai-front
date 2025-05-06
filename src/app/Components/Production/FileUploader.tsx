@@ -21,11 +21,6 @@ export const FileUploader: React.FC<stateProps> = ({
 }) => {
   const [fileName, setFileName] = useState<string>('')
 
-  // موقعِ لود کامپوننت، اسم ذخیره‌شده را از localStorage می‌خوانیم
-  useEffect(() => {
-    const saved = localStorage.getItem('uploadedFileName')
-    if (saved) setFileName(saved)
-  }, [])
 
   const excelDateToJSDate = (serial: number): string => {
     const utc_days = Math.floor(serial - 25569)
@@ -39,9 +34,9 @@ export const FileUploader: React.FC<stateProps> = ({
       if (acceptedFiles.length === 0) return
 
       const file = acceptedFiles[0]
-      //‌ ذخیره نام فایل هم در state و هم در localStorage
+ 
       setFileName(file.name)
-      localStorage.setItem('uploadedFileName', file.name)
+    
 
       const reader = new FileReader()
       reader.onabort = () => console.log('file reading was aborted')

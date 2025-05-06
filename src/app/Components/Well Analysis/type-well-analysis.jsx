@@ -25,11 +25,8 @@ export default function TypeWellAnalysis() {
   // selected ARPS model
   const [selectedModel, setSelectedModel] = useState("Exponential");
 
-  // table data persisted in localStorage
-  const [dataTabel, setdataTabel] = useState(() => {
-    const stored = localStorage.getItem("dataTabel");
-    return stored ? JSON.parse(stored) : [];
-  });
+
+  const [dataTabel, setdataTabel] = useState({});
 
 
   // initial params (qi, D, b)
