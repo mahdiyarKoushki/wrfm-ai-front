@@ -10,6 +10,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  TooltipProps,
 } from "recharts";
 import { Button } from "../../ui/button";
 import { DatePickerValue } from "../../ui/DatePickerValue";
@@ -26,6 +27,37 @@ interface RightSectionProps {
   dataTabel: DataRow[];
   filterData: boolean;
 }
+
+const formatXAxis = (dateStr: string) => {
+  const date = parseISO(dateStr);
+  return format(date, "MM-dd");
+};
+
+const customTooltip = ({
+  active,
+  payload,
+}: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="p-2 bg-white border border-gray-300 rounded">
+        <p>
+          <strong>Date:</strong> {formatXAxis(payload[0].payload.Date)}
+        </p>
+        <p style={{ color: "#4bcf3d" }}>
+          <strong>Oil (STBD):</strong> {Number(payload[0].value).toFixed(0)}
+        </p>
+        <p style={{ color: "#641c4e" }}>
+          <strong>FTHP (psig):</strong> {payload[1].value}
+        </p>
+        <p style={{ color: "#342dc8" }}>
+          <strong>Choke (1/64"):</strong> {payload[2].value}
+        </p>
+      </div>
+    );
+  }
+
+  return null;
+};
 
 const OilProductionChart: React.FC<RightSectionProps> = ({
   dataTabel,
@@ -52,11 +84,6 @@ const OilProductionChart: React.FC<RightSectionProps> = ({
     } else {
       setFilteredData(dataTabel);
     }
-  };
-
-  const formatXAxis = (dateStr: string) => {
-    const date = parseISO(dateStr);
-    return format(date, "MM-dd");
   };
 
   return (
@@ -118,9 +145,9 @@ const OilProductionChart: React.FC<RightSectionProps> = ({
               yAxisId="whp"
               orientation="right"
               stroke="#641c4e"
-              offset={0} // Set an initial offset
+              offset={0}
               label={{
-                value: "WHP (psig)",
+                value: "FTHP (psig)",
                 angle: 90,
                 position: "insideBottom",
                 fill: "#641c4e",
@@ -130,7 +157,7 @@ const OilProductionChart: React.FC<RightSectionProps> = ({
               yAxisId="choke"
               orientation="right"
               stroke="#342dc8"
-              offset={80} // Offset to create space between WHP and Choke axes
+              offset={80}
               label={{
                 value: `Choke (1/64")`,
                 angle: 90,
@@ -139,7 +166,7 @@ const OilProductionChart: React.FC<RightSectionProps> = ({
               }}
             />
 
-            <Tooltip />
+            <Tooltip content={customTooltip} />
             <Line
               type="monotone"
               dot={false}
@@ -151,10 +178,11 @@ const OilProductionChart: React.FC<RightSectionProps> = ({
             />
             <Line
               dot={false}
-              name="WHP (psig)"
+              name="FTHP (psig)"
               type="monotone"
               dataKey="WHP"
               stroke="#641c4e"
+              
               yAxisId="whp"
             />
             <Line

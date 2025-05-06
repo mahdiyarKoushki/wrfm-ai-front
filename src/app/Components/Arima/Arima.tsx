@@ -53,15 +53,15 @@ export default function Arima() {
   const [allData, setallData] = useState<any>({})
   const [rangTrain, setRangTrain] = useState<string | number>("50")
   const [initialParameters,setinitialParameters] = useState<any>({  
-    P: { name: "P", from: 0, to: 3 },
-    D:{ name: "D", from: 0, to: 2 },
-    Q: { name: "Q", from: 0, to: 3 },
+    P: { name: "p", from: 0, to: 3 },
+    D:{ name: "d", from: 0, to: 2 },
+    Q: { name: "q", from: 0, to: 3 },
 
   })
 
   const [bestModels, setBestModels] = useState<number[]>([0, 0, 0])
-  const [chartACFdata, setChartACFdata] = useState<number[]>([])
-  const [chartPACFdata, setChartPACFdata] = useState<number[]>([])
+  const [chartACFdata, setChartACFdata] = useState<{}>({})
+  const [chartPACFdata, setChartPACFdata] = useState<{}>({})
   const [dataDialogChart, setDataDialogChart] = useState<any>({})
   const [metrics, setmetrics] = useState<any>({})
   const [OpenChart, setOpenChart] = useState<boolean>(false)
@@ -143,8 +143,14 @@ export default function Arima() {
       }
       const res = await NewArimaPosts(params)
       setBestModels(res.data.result.recom_order.recommended_order)
-      setChartACFdata(res.data.result.acf_pacf_data.acf_data.acf_values)
-      setChartPACFdata(res.data.result.acf_pacf_data.pacf_data.pacf_values)
+      setChartACFdata({
+        config:res.data.result.acf_pacf_data.acf_data.acf_confint,
+        values:res.data.result.acf_pacf_data.acf_data.acf_values
+      })
+      setChartPACFdata({
+        config:res.data.result.acf_pacf_data.pacf_data.pacf_confint,
+        values:res.data.result.acf_pacf_data.pacf_data.pacf_values
+      })
       setallData(res.data)
 
     } catch (err) {

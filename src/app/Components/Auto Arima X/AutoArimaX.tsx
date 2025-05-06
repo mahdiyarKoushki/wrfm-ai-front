@@ -54,9 +54,9 @@ export default function AutoArimaX() {
   const [allData, setallData] = useState<any>({})
   const [rangTrain, setRangTrain] = useState<string | number>("50")
   const [initialParameters,setinitialParameters] = useState<any>({  
-    P: { name: "P", from: 0, to: 3 },
-    D:{ name: "D", from: 0, to: 2 },
-    Q: { name: "Q", from: 0, to: 3 },
+    P: { name: "p", from: 0, to: 3 },
+    D:{ name: "d", from: 0, to: 2 },
+    Q: { name: "q", from: 0, to: 3 },
 
   })
 

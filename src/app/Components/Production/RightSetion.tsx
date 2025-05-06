@@ -74,7 +74,7 @@ export const RightSection: React.FC<RightSectionProps> = ({ dataTabel }) => {
                     <th className="p-3 text-center">#</th>
                     <th className="p-3 text-center">Date</th>
                     <th className="p-3 text-center">Choke (1/64")</th>
-                    <th className="p-3 text-center">WHP (psig) </th>
+                    <th className="p-3 text-center">FTHP (psig) </th>
                     <th className="p-3 text-center">Oil (STBD)</th>
                   </tr>
                 </thead>
