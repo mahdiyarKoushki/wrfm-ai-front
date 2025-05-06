@@ -8,9 +8,10 @@ import { Label } from "../ui/label"
 import { Input } from "../ui/input"
 import ChartArima from "./ChartArima"
 import { GenerateChartModal } from "../Generate Chart Modal/GenerateChartModal"
-import { ArimaPosts } from "@/api-client/api-client"
+import { ArimaPosts, NewArimaPosts, NewArimaPostsStepTWO } from "@/api-client/api-client"
 import { FormControl, MenuItem, Select } from "@mui/material"
 import { wells } from "../Well Analysis/mui-style-well-select"
+import useWellStore from "@/store/zustandState"
 
 const override: CSSProperties = {
   display: "block",
@@ -24,43 +25,76 @@ interface Parameters {
   to: number
 }
 interface ParametersItemProps {
-  Parameters: Parameters
+  Parameters: Parameters,
+  onChange:(name:string,dir:string,value:string)=>void
 }
-const ParametersItem: React.FC<ParametersItemProps> = ({ Parameters }) => (
+const ParametersItem: React.FC<ParametersItemProps> = ({ Parameters,onChange }) => (
   <div className="flex items-center justify-between space-y-2 mt-3 space-x-10">
-    <Label htmlFor={Parameters.name} className="text-sm">
+    <Label htmlFor={Parameters.name} className="text">
       {Parameters.name}
     </Label>
     <div className="flex items-center space-x-2">
       <span>from</span>
-      <Input disabled id={Parameters.name} value={Parameters.from} />
+      <Input onChange={(e)=>{onChange(Parameters.name,"from",e.target.value)}}  id={Parameters.name} value={Parameters.from} />
     </div>
     <div className="flex items-center space-x-2">
       <span>to</span>
-      <Input disabled id={Parameters.name} value={Parameters.to} />
+      <Input onChange={(e)=>{onChange(Parameters.name,"to",e.target.value)}}  id={Parameters.name} value={Parameters.to} />
     </div>
   </div>
 )
 
 export default function Arima() {
   const [loading, setLoading] = useState<boolean>(false)
-  const [well, setWell] = useState("SPH-04")
+  const { well } = useWellStore();
+
+  
+
+  const [allData, setallData] = useState<any>({})
   const [rangTrain, setRangTrain] = useState<string | number>("50")
-  const [initialParameters] = useState<Parameters[]>([
-    { name: "p", from: 0, to: 0 },
-    { name: "d", from: 0, to: 0 },
-    { name: "q", from: 0, to: 0 },
-  ])
+  const [initialParameters,setinitialParameters] = useState<any>({  
+    P: { name: "P", from: 0, to: 3 },
+    D:{ name: "D", from: 0, to: 2 },
+    Q: { name: "Q", from: 0, to: 3 },
+
+  })
+
   const [bestModels, setBestModels] = useState<number[]>([0, 0, 0])
   const [chartACFdata, setChartACFdata] = useState<number[]>([])
   const [chartPACFdata, setChartPACFdata] = useState<number[]>([])
   const [dataDialogChart, setDataDialogChart] = useState<any>({})
+  const [metrics, setmetrics] = useState<any>({})
   const [OpenChart, setOpenChart] = useState<boolean>(false)
 
-  const handleWellChange = (e: any) => {
-    setWell(e.target.value)
-    fetchArima(e.target.value)
-  }
+  const [p, setP] = useState<number>(0);
+  const [d, setD] = useState<number>(0);
+  const [q, setQ] = useState<number>(0);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    const intValue = parseInt(value, 10) || 0;
+
+    switch (id) {
+      case 'p':
+        setP(intValue);
+        break;
+      case 'd':
+        setD(intValue);
+        break;
+      case 'q':
+        setQ(intValue);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const generateOutput = () => {
+    return `${p},${d},${q}`;
+  };
+
+
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRangTrain(e.target.value)
   }
@@ -77,9 +111,7 @@ export default function Arima() {
       }
       const res = await ArimaPosts(params)
 
-      setChartACFdata(res.data.acf_pacf_data.acf_data.acf_values)
-      setChartPACFdata(res.data.acf_pacf_data.pacf_data.pacf_values)
-      setBestModels(res.data.recom_order.recommended_order)
+   
 
       const Measured_train = JSON.parse(res.data.metrics_and_data.train)
       const Predicted_train = JSON.parse(
@@ -90,12 +122,65 @@ export default function Arima() {
       )
       const Measured_Validation = JSON.parse(res.data.metrics_and_data.valid)
 
-      setDataDialogChart({
-        Measured_train,
-        Predicted_train,
-        Predicted_Validation,
-        Measured_Validation,
-      })
+   
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+  const fetchArimaNew = async (wellName = well) => {
+    setLoading(true)
+    try {
+      const params = {
+        well_name  :well,
+  start_p:Number(initialParameters.P.from),
+  max_p:Number(initialParameters.P.to),
+  d:Number(initialParameters.D.from),
+  max_d:Number(initialParameters.D.to),
+  start_q:Number(initialParameters.Q.from),
+  max_q:Number(initialParameters.Q.to),
+      }
+      const res = await NewArimaPosts(params)
+      setBestModels(res.data.result.recom_order.recommended_order)
+      setChartACFdata(res.data.result.acf_pacf_data.acf_data.acf_values)
+      setChartPACFdata(res.data.result.acf_pacf_data.pacf_data.pacf_values)
+      setallData(res.data)
+
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+  const fetchArimaNewTWO = async (wellName = well) => {
+    setLoading(true)
+    // allData
+    try {
+      const params = {
+        "well_name":allData.well_name,
+        "var_target_col": allData.var_target_col,
+        "var_lam": allData.var_lam,
+        "var_df": allData.var_df,
+        "train_ratio": (Number(rangTrain)/100),
+        "order": "1,2,3"
+      }
+      const res = await NewArimaPostsStepTWO(params)
+      const blind=JSON.parse(res.data.metrics_and_data.blind)
+      const pred_test=JSON.parse(res.data.metrics_and_data.pred_test)
+      const predict_df=JSON.parse(res.data.metrics_and_data.predict_df)
+      const train=JSON.parse(res.data.metrics_and_data.train)
+      const valid=JSON.parse(res.data.metrics_and_data.valid)
+      const train_forecast=JSON.parse(res.data.metrics_and_data.train_forecast)
+      const metrics =res.data.metrics_and_data.metrics
+      const dataChart={
+        blind,pred_test,predict_df,train,valid,train_forecast
+      }
+      setmetrics(metrics)
+      
+      
+      setDataDialogChart(dataChart)
+
     } catch (err) {
       console.error(err)
     } finally {
@@ -104,8 +189,22 @@ export default function Arima() {
   }
 
   useEffect(() => {
-    fetchArima()
+    fetchArimaNew()
   }, [])
+
+  const handleChangeParameters:(name:string,dir:string,value:string)=>void=(name,dir,value)=>{
+    setinitialParameters((last:any)=>{
+      const temp={...last}
+      if (dir=="from") {
+        temp[name]={name,from:value,to:last[name].to}
+          return temp
+      }else{
+        temp[name]={name,from:last[name].from,to: value}
+        return temp
+      }
+    })
+
+  }
 
   return (
     <div className="container mx-auto px-4 relative">
@@ -124,14 +223,14 @@ export default function Arima() {
       )}
 
       {/* === Header === */}
-      <Header title={"ARIMA Algorithm"} />
+      <Header rout="/Prediction" title={"ARIMA Algorithm"} />
 
       {/* === Main Grid === */}
       <div className="h-200 grid grid-cols-6 lg:grid-cols-12 space-x-5">
         {/* Left Panel */}
         <div className="col-span-6 lg:col-span-7">
           {/* Well selector */}
-          <div className="mb-10">
+          {/* <div className="mb-10">
             <h2 className="font-bold mb-2">Well Name</h2>
             <FormControl sx={{ minWidth: 200, mt: "5px" }} size="small">
               <Select onChange={handleWellChange} value={well}>
@@ -142,7 +241,7 @@ export default function Arima() {
                 ))}
               </Select>
             </FormControl>
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-12 space-x-10">
             {/* Parameters */}
@@ -150,9 +249,41 @@ export default function Arima() {
               <h2 className="border-b border-gray-300 pb-2 text-gray-400 font-bold">
                 Parameters
               </h2>
-              {initialParameters.map((p) => (
-                <ParametersItem key={p.name} Parameters={p} />
+              {Object.keys(initialParameters).map((p) => (
+                <ParametersItem key={p} onChange={handleChangeParameters} Parameters={initialParameters[p]} />
               ))}
+         <div className=" border-t mt-6  w-[690px] border-gray-300 pb-2">
+         <div className="space-x-3 mt-5">
+                <h2 className="text-gray-400 font-bold">Best Model</h2>
+                <div className="flex space-x-5 py-5">
+                  <span> p = {bestModels[0]}</span>
+                  <span> d = {bestModels[1]}</span>
+                  <span> q = {bestModels[2]}</span>
+                </div>
+
+              </div>
+         </div>
+
+                <div className="space-x-3 mt-10 w-100">
+                <h2 className="text-gray-400 font-bold">User Select</h2>
+                <div className="grid grid-cols-4 space-x-5 py-3">
+                  <div className="flex items-center space-x-2">
+                    <span> p </span> <Input  id="p"
+            value={p}
+            onChange={handleInputChange}  />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span> d </span> <Input  id="d"
+                                  value={d}
+                              onChange={handleInputChange} />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span> q </span> <Input id="q"
+            value={q}
+            onChange={handleInputChange} />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Tuning & Best Model */}
@@ -167,47 +298,34 @@ export default function Arima() {
                 />{" "}
                 <span>{rangTrain} %</span>
               </div>
+              <Button
+                onClick={()=>{fetchArimaNew()}}
+                
+                className="bg-gray-800 hover:bg-gray-700 cursor-pointer my-5 text-white w-43 mt-20 ml-50"  >
+                 Apply
+              </Button>
+            
+            
 
-              <div className="space-x-3 mt-5">
-                <h2 className="text-gray-400 font-bold">Best Model</h2>
-                <div className="flex space-x-5 py-5">
-                  <span> p = {bestModels[0]}</span>
-                  <span> d = {bestModels[1]}</span>
-                  <span> q = {bestModels[2]}</span>
-                </div>
-              </div>
-
-              <div className="space-x-3 mt-6">
-                <h2 className="text-gray-400 font-bold">User Select</h2>
-                <div className="grid grid-cols-4 space-x-5 py-3">
-                  <div className="flex items-center space-x-2">
-                    <span> p </span> <Input disabled id="p" value={0} />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span> d </span> <Input disabled id="d" value={0} />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span> q </span> <Input disabled id="q" value={0} />
-                  </div>
-                </div>
-              </div>
+              
             </div>
           </div>
 
           {/* Generate Forecast */}
-          <div className="mt-50 ml-11">
-            <h2 className="p-2 border w-60 text-center rounded-t-2xl font-bold border-b-0">
+          <div className="mt-5 ml-11">
+            {/* <h2 className="p-2 border w-60 text-center rounded-t-2xl font-bold border-b-0">
               Generate Forecast
-            </h2>
+            </h2> */}
             <div className="border w-110 py-3 px-10 rounded-tr-2xl">
-              <h2 className="border-b border-gray-300 pb-2 text-gray-400 font-bold">
-                Projection Settings
-              </h2>
+     
               <Button
-                onClick={openModalChart}
+                onClick={()=>{
+                  openModalChart()
+                 fetchArimaNewTWO()
+                }}
                 className="bg-gray-800 hover:bg-gray-700 cursor-pointer my-5 text-white w-43"
               >
-                Apply
+                 Generate Forecast
               </Button>
             </div>
           </div>
@@ -217,18 +335,21 @@ export default function Arima() {
         <div className="col-span-6 lg:col-span-5 space-y-20">
           <ChartArima title="Autocorrelation (ACF)" dataChart={chartACFdata} />
           <ChartArima
-            title="Autocorrelation (PACF)"
+            title="Partial Autocorrelation (PACF)"
             dataChart={chartPACFdata}
           />
         </div>
       </div>
 
-      {/* Forecast Modal */}
-      <GenerateChartModal
+      {/* Forecast Modal */} 
+      {!loading &&  <GenerateChartModal
         data={dataDialogChart}
+        metrics={metrics}
         OpenChart={OpenChart}
         closeChart={closeChart}
       />
+      }
+     
     </div>
   )
 }

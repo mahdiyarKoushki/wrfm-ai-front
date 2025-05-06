@@ -17,11 +17,15 @@ import WellProductionChart from "./well-production-chart";
 import WellProductionChart2 from "../Well Analysis/well-production-chart";
 import { generateWellData } from "../../libo/generate-data";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import CustomLineChart from "./CustomLineChart";
+import useWellStore from "@/store/zustandState";
+import ProbabilisticChart from "./ProbabilisticChart";
 
 export default function DeclineCurveAnalysis() {
   const router = useRouter();
 
-  const [well, setWell] = useState("SPH-02");
+  const { well } = useWellStore();
+
   const [wellData, setWellData] = useState([]);
   const [selectedModel, setSelectedModel] = useState("Exponential");
   const [initialParams, setInitialParams] = useState({
@@ -36,21 +40,17 @@ export default function DeclineCurveAnalysis() {
     MAPE: 0.00,
   });
   const [Parameters, setParameters] = useState({});
-  const [dataRateChart, setdataRateChart] = useState([]);
-  const [dataCumulativeChart, setdataCumulativeChart] = useState([]);
-  const [dataProbabilisticChart, setdataProbabilisticChart] = useState([]);
+  const [dataRateChart, setdataRateChart] = useState({forecast:{},history:{}});
+  const [dataCumulativeChart, setdataCumulativeChart] = useState({forecast:{},history:{}});
+  const [dataProbabilisticChart, setdataProbabilisticChart] = useState({});
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
   const [results, setResults] = useState(null);
 
-  useEffect(() => {
-    // simulate loading historical well data
-    const data = generateWellData(365);
-    setWellData(data);
-  }, []);
 
-  const handleWellChange = (event) => {
-    setWell(event.target.value);
-  };
+
+
+
+
 
   const handleCompareModels = () => {
     setIsModelModalOpen(true);
@@ -68,19 +68,39 @@ export default function DeclineCurveAnalysis() {
       setResults(data);
       setMetrics(data?.data[well].models[selectedModel].errors_rate_historical)
       setParameters(data?.data[well].models[selectedModel].parameters)
-      setdataRateChart(data?.data[well].models[selectedModel].forecast_rate)
-      setdataCumulativeChart(data?.data[well].models[selectedModel].forecast_cumulative)
+  
+      setdataRateChart(
+        {
+          forecast:data?.data[well].models[selectedModel].forecast_rate,
+        history:data?.data[well].historical_data_rate,
+        historical_fitted_rate:data?.data[well].models[selectedModel].historical_fitted_rate,
+      })
+      setdataCumulativeChart(
+        {
+          forecast:data?.data[well].models[selectedModel].forecast_cumulative,
+          history:data?.data[well].historical_data_cumulative,
+          historical_fitted_rate: data?.data[well].historical_data_cumulative
+        })
+      // historical_fitted_rate
       const probabilistic= data?.data[well].models[selectedModel].probabilistic_forecast_rate
-      const convertProbabilistic = Object.keys(probabilistic.P10)              // ["1.0","2.0",…, "728.0"]
-  .sort((a,b)=>parseFloat(a)-parseFloat(b))        // ensure numeric order
-  .map(k => ({
-    P10: probabilistic.P10[k],
-    P50: probabilistic.P50[k],
-    P90: probabilistic.P90[k]
-  }));
-
+  //     const convertProbabilistic = Object.keys(probabilistic.P10)              // ["1.0","2.0",…, "728.0"]
+  // .sort((a,b)=>parseFloat(a)-parseFloat(b))        // ensure numeric order
+  // .map(k => ({
+  //   P10: probabilistic.P10[k],
+  //   P50: probabilistic.P50[k],
+  //   P90: probabilistic.P90[k]
+  // }));
+const historical_data_rate= data?.data[well].historical_data_rate
+const historical_fitted_rate=data?.data[well].models[selectedModel].historical_fitted_rate
 // console.log(JSON.stringify(result, null, 2));
-      setdataProbabilisticChart(convertProbabilistic)
+
+      setdataProbabilisticChart({
+          P10:probabilistic.P10,
+          P50:probabilistic.P50,
+          P90:probabilistic.P90,
+          historical_data_rate,
+          historical_fitted_rate
+      })
 
     } catch (error) {
       console.error("An error occurred:", error);
@@ -98,13 +118,13 @@ export default function DeclineCurveAnalysis() {
 
   return (
     <div className="container mx-auto px-4">
-      <Header title="Decline Curve Analysis" />
+      <Header rout="/Prediction" title="Decline Curve Analysis" />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/** Left panel */}
         <div className="space-y-6">
           {/** Well selector */}
-          <div>
+          {/* <div>
             <h2 className=" font-bold mb-2">Well Name</h2>
             <FormControl sx={{ minWidth: 200, mt: "5px" }} size="small">
               <Select value={well} onChange={handleWellChange}>
@@ -115,10 +135,10 @@ export default function DeclineCurveAnalysis() {
                 ))}
               </Select>
             </FormControl>
-          </div>
+          </div> */}
 
           {/** Model selection */}
-          <div>
+          <div className="mb-10">
             <h2 className=" font-bold mb-2">Model Selection</h2>
             <div className="grid grid-cols-2 gap-2">
               {[
@@ -146,7 +166,7 @@ export default function DeclineCurveAnalysis() {
 
           {/** Compare models button */}
 
-          <div>
+          <div className="mb-10">
             <Button
               onClick={handleCompareModels}
               variant="outline"
@@ -159,7 +179,7 @@ export default function DeclineCurveAnalysis() {
           </div>
 
           {/** Initial parameters inputs */}
-          <div className="grid grid-cols-1 gap-6">
+          {/* <div className="grid grid-cols-1 gap-6">
             <div>
               <h2 className="text-gray-400 font-bold mb-2">
                 Initial Parameters
@@ -185,12 +205,12 @@ export default function DeclineCurveAnalysis() {
                 ))}
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/** Optimal parameters table (static placeholder) */}
-          <div className="grid grid-cols-12 gap-6">
+          <div className="grid grid-cols-12 gap-10">
             <div className="col-span-8">
-              <h2 className="text-gray-400 font-bold mb-2">
+              <h2 className="text-gray-400 font-bold mb-5">
                 Optimal Parameters
               </h2>
               <div className="overflow-x-auto">
@@ -266,9 +286,9 @@ export default function DeclineCurveAnalysis() {
             <Button variant="outline" className="w-40">
               Import
             </Button>
-            <Button variant="outline" className="w-40">
+            {/* <Button variant="outline" className="w-40">
               Reset
-            </Button>
+            </Button> */}
           </div>
         </div>
 
@@ -285,21 +305,23 @@ export default function DeclineCurveAnalysis() {
                           <TabsContent value="Rate" className="pt-4">
                          
                             <div className="h-[400px]">
-                            <WellProductionChart data={dataRateChart} />
+                          
+                            <CustomLineChart data={dataRateChart} />
             
                             </div>
                           </TabsContent>
                           <TabsContent value="Cumulative" className="pt-4">
                          
                             <div className="h-[400px]">
-                            <WellProductionChart data={dataCumulativeChart} />
+
+                            <CustomLineChart data={dataCumulativeChart} />
             
                             </div>
                           </TabsContent>
                           <TabsContent value="Probabilistic" className="pt-4">
                          
                             <div className="h-[400px]">
-                             <WellProductionChart2 data={dataProbabilisticChart}  title=""/>
+                             <ProbabilisticChart data={dataProbabilisticChart}  title=""/>
             
                             </div>
                           </TabsContent>
@@ -340,6 +362,7 @@ export default function DeclineCurveAnalysis() {
 
       <ModelParametersModal
         isOpen={isModelModalOpen}
+         days={projectionDays}
         onClose={() => setIsModelModalOpen(false)}
       />
     </div>

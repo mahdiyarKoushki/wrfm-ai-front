@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { Header } from "../Header";
 import { generateWellData } from "../../libo/generate-data";
 import { declineCurveAnalysis, typeWellAnalysis } from "@/api-client/api-client";
+import MultiChart from "./multiChart";
 
 export default function TypeWellAnalysis() {
   const router = useRouter();
@@ -29,9 +30,7 @@ export default function TypeWellAnalysis() {
     const stored = localStorage.getItem("dataTabel");
     return stored ? JSON.parse(stored) : [];
   });
-  useEffect(() => {
-    localStorage.setItem("dataTabel", JSON.stringify(dataTabel));
-  }, [dataTabel]);
+
 
   // initial params (qi, D, b)
   const [initialParams, setInitialParams] = useState({
@@ -40,20 +39,13 @@ export default function TypeWellAnalysis() {
     b: "auto",
   });
 
-  // metrics for P10/P50/P90
-  const [metrics, setMetrics] = useState({
-    P10: { MAE: "0.73", RMSE: "0.95", MAPE: "0.25" },
-    P50: { MAE: "0.73", RMSE: "0.95", MAPE: "0.25" },
-    P90: { MAE: "0.73", RMSE: "0.95", MAPE: "0.25" },
-  });
 
     const [Parameters, setParameters] = useState({});
     const [Analysis, setAnalysis] = useState({});
-    const [DataRrsultChart, setDataRrsultChart] = useState({});
+    const [DataRrsultChart, setDataRrsultChart] = useState([]);
+    const [DataHistoryChart, setDataHistoryChart] = useState([]);
     const fields = ["qi","D","b","K","a","n","D_lim","beta"];
-  console.log('====================================');
-  console.log(DataRrsultChart);
-  console.log('====================================');
+
 
   // generate dummy well history on mount
   useEffect(() => {
@@ -86,14 +78,73 @@ export default function TypeWellAnalysis() {
       setAnalysis(analysis)
       setParameters(parameters)
       const probabilistic= data.fitted_data_points[selectedModel]
-      const convertProbabilistic = Object.keys(probabilistic.P10)              // ["1.0","2.0",…, "728.0"]
+      const percentile_curves= data.percentile_curves
+  
+      const convertProbabilistic = Object.keys(probabilistic.P10)             
   .sort((a,b)=>parseFloat(a)-parseFloat(b))        // ensure numeric order
   .map(k => ({
     P10: probabilistic.P10[k],
     P50: probabilistic.P50[k],
-    P90: probabilistic.P90[k]
+    P90: probabilistic.P90[k],
+    G10:percentile_curves.P10[k],
+    G50:percentile_curves.P50[k],
+    G90:percentile_curves.P90[k],
+
   }));
+      const convertProbabilistic2 = Object.keys(probabilistic.P10)         
+  .sort((a,b)=>parseFloat(a)-parseFloat(b))        // ensure numeric order
+  .map(k => ({
+    P10: probabilistic.P10[k],
+    P50: probabilistic.P50[k],
+    P90: probabilistic.P90[k],
+
+
+  }));
+
       setDataRrsultChart(convertProbabilistic)
+
+      const individual_well_history_dict=data.individual_well_history_dict    
+      const firstKey = Object.keys(individual_well_history_dict)[0];
+
+
+const numberOfItems = Object.keys(individual_well_history_dict[firstKey]).length;
+
+const transformedData = [];
+
+// Transform the data
+for (let i = 0; i < numberOfItems; i++) {
+    const entry = {};
+    for (const key in individual_well_history_dict) {
+        if (individual_well_history_dict[key].hasOwnProperty(i.toString())) {
+            entry[key] = individual_well_history_dict[key][i.toString()];
+        }
+    }
+    transformedData.push(entry);
+}
+
+// console.log(transformedData,convertProbabilistic2);
+
+const maxLength = Math.max(transformedData.length, convertProbabilistic2.length);
+const mergedArray = [];
+
+for (let i = 0; i < maxLength; i++) {
+    const entry = {};
+
+    // Add properties from array1 if available
+    if (i < transformedData.length) {
+        Object.assign(entry, transformedData[i]);
+    }
+
+    // Add properties from array2 if available
+    if (i < convertProbabilistic2.length) {
+        Object.assign(entry, convertProbabilistic2[i]);
+    }
+
+    mergedArray.push(entry);
+}
+setDataHistoryChart(mergedArray)
+
+// console.log({mergedArray});
 
 
     } catch (err) {
@@ -101,6 +152,8 @@ export default function TypeWellAnalysis() {
       setResults({ error: "Error fetching type well analysis" });
     }
   };
+
+  
 
   // transform percentile curves into an array
   const costData = results?.percentile_curves;
@@ -138,7 +191,7 @@ export default function TypeWellAnalysis() {
 
   return (
     <div className="container mx-auto px-4">
-      <Header title="Type Well Analysis" />
+      <Header rout="/Prediction" title="Type Well Analysis" />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
         <div className="space-y-6">
@@ -185,7 +238,7 @@ export default function TypeWellAnalysis() {
           </div>
 
           {/* Initial Parameters */}
-          <div>
+          {/* <div>
             <h2 className="text-gray-400 font-bold mb-2">Initial Parameters</h2>
             <div className="grid grid-cols-3 gap-4">
               {["qi", "D", "b"].map((key) => (
@@ -206,7 +259,7 @@ export default function TypeWellAnalysis() {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Optimal Parameters Table */}
           <div>
@@ -255,9 +308,9 @@ export default function TypeWellAnalysis() {
             <Button className="w-40" variant="outline">
               Import
             </Button>
-            <Button className="w-40" variant="outline">
+            {/* <Button className="w-40" variant="outline">
               Reset
-            </Button>
+            </Button> */}
           </div>
         </div>
 
@@ -274,14 +327,14 @@ export default function TypeWellAnalysis() {
               <TabsContent value="history" className="pt-4">
                 <div className="h-[400px]">
                   <WellProductionChart
-                    data={combinedData}
+                    data={DataHistoryChart}
                     title="Well Histories with Percentiles"
                   />
                 </div>
               </TabsContent>
               <TabsContent value="result" className="pt-4">
                 <div className="h-[400px]">
-                 <WellProductionChart data={DataRrsultChart}  title=""/>
+                 <MultiChart selectedModel={selectedModel} data={DataRrsultChart}  title=""/>
                 </div>
               </TabsContent>
             </Tabs>

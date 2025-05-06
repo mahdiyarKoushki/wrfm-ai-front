@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/page.tsx", "src/app/Components/Decline Curve Analysis/decline-curve-analysis.jsx", "src/app/Components/Well Analysis/type-well-analysis.jsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/page.tsx", "src/app/Components/Decline Curve Analysis/decline-curve-analysis.jsx", "src/app/Components/Well Analysis/type-well-analysis.jsx", "src/app/Components/Well Analysis/well-production-chart.tsx"],
   "exclude": ["node_modules"]
 }

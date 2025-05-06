@@ -9,7 +9,7 @@ interface MainProductonProps {
 function page() {
   return (
 <ProductionLayout>
-<Header title={"Rate Prediction UI Design"}/>
+<Header rout="/" title={"Production Forecasting"}/>
 <MainProduction>
 </MainProduction>
 </ProductionLayout> 

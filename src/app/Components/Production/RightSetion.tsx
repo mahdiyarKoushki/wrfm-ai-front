@@ -5,7 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Button } from "../ui/button";
 import OilProductionChart from './oli-chart/OilProductionChart';
 
-
 interface DataRow {
   Date: string;
   Choke: number;
@@ -15,14 +14,12 @@ interface DataRow {
 }
 
 interface RightSectionProps {
-  dataTabel: DataRow[];
+  dataTabel: any;
 }
 
 export const RightSection: React.FC<RightSectionProps> = ({ dataTabel }) => {
-
-  
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 10;
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -31,7 +28,6 @@ export const RightSection: React.FC<RightSectionProps> = ({ dataTabel }) => {
   const totalPages = Math.ceil(dataTabel.length / itemsPerPage);
   const pageNumbers = [];
 
-  // Calculate start and end pages for the pagination
   let startPage = Math.max(1, currentPage - 2);
   let endPage = Math.min(totalPages, currentPage + 2);
 
@@ -50,14 +46,12 @@ export const RightSection: React.FC<RightSectionProps> = ({ dataTabel }) => {
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
-  
-
 
   return (
     <div className="">
       <div className="container mx-auto py-6 px-4">
         <Tabs defaultValue="table" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 max-w-md mb-6">
+          <TabsList className="grid w-full grid-cols-2 max-w-md mb-6 ml-40">
             <TabsTrigger
               value="table"
               className="text-blue-600 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none"
@@ -73,36 +67,42 @@ export const RightSection: React.FC<RightSectionProps> = ({ dataTabel }) => {
           </TabsList>
 
           <TabsContent value="table" className="space-y-8">
-            {/* Well Data Table */}
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-blue-600 text-white">
-                    <th className="p-3 text-left">#</th>
-                    <th className="p-3 text-left">Date</th>
-                    <th className="p-3 text-left">Choke</th>
-                    <th className="p-3 text-left">BSTP</th>
-                    <th className="p-3 text-left">WHP</th>
-                    <th className="p-3 text-left">Oil</th>
+                    <th className="p-3 text-center">#</th>
+                    <th className="p-3 text-center">Date</th>
+                    <th className="p-3 text-center">Choke (1/64")</th>
+                    <th className="p-3 text-center">WHP (psig) </th>
+                    <th className="p-3 text-center">Oil (STBD)</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {currentItems.map((row: DataRow, index) => (
+                  {currentItems.map((row: DataRow, index:number) => (
                     <tr key={index} className={index % 2 === 1 ? "bg-gray-50" : "bg-white"}>
-                      <td className="p-3">{indexOfFirstItem + index + 1}</td>
-                      <td className="p-3">{row.Date}</td>
-                      <td className="p-3">{row.Choke}</td>
-                      <td className="p-3">{row.BSTP}</td>
-                      <td className="p-3">{row.WHP}</td>
-                      <td className="p-3">{row.Oil}</td>
+                      <td className="p-3  text-center">{indexOfFirstItem + index + 1}</td>
+                      <td className="p-3 text-center">{formatDateString(row.Date)}</td>
+                      <td className="p-3 text-center">{row.Choke}</td>
+                      <td className="p-3 text-center">{row.WHP}</td>
+                      <td className="p-3 text-center">{row.Oil?.toFixed()}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
 
-            {/* Pagination */}
             <div className="flex justify-center items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 p-0"
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(1)}
+              >
+                First
+                <span className="sr-only">First page</span>
+              </Button>
               <Button
                 variant="outline"
                 size="icon"
@@ -136,72 +136,34 @@ export const RightSection: React.FC<RightSectionProps> = ({ dataTabel }) => {
                 <ChevronRight className="h-4 w-4" />
                 <span className="sr-only">Next page</span>
               </Button>
-            </div>
 
-            {/* Statistical Analysis */}
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 p-0"
+                disabled={currentPage === totalPages}
+                onClick={() => handlePageChange(totalPages)}
+              >
+                Last
+                <span className="sr-only">Last page</span>
+              </Button>
+            </div>
           </TabsContent>
 
           <TabsContent value="chart">
-            <OilProductionChart  dataTabel={dataTabel}  filterData={true}/>
+            <OilProductionChart dataTabel={dataTabel} filterData={true} />
           </TabsContent>
         </Tabs>
-      </div>
-      <div>
-        <h2 className="text-center font-medium mb-4">Statistical Analysis Overview</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-blue-600 text-white">
-                <th className="p-3 text-left">#</th>
-                <th className="p-3 text-left">Count</th>
-                <th className="p-3 text-left">mean</th>
-                <th className="p-3 text-left">std</th>
-                <th className="p-3 text-left">min</th>
-                <th className="p-3 text-left">25%</th>
-                <th className="p-3 text-left">50%</th>
-                <th className="p-3 text-left">75%</th>
-                <th className="p-3 text-left">max</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Dummy data for analysis, should be dynamic if needed */}
-              <tr>
-                <td className="p-3">Oil</td>
-                <td className="p-3">714.0</td>
-                <td className="p-3">15.705</td>
-                <td className="p-3">10.328</td>
-                <td className="p-3">0.00</td>
-                <td className="p-3">3.7916</td>
-                <td className="p-3">24.00</td>
-                <td className="p-3">24.00</td>
-                <td className="p-3">25.00</td>
-              </tr>
-              <tr className="bg-gray-50">
-                <td className="p-3">Choke</td>
-                <td className="p-3">714.0</td>
-                <td className="p-3">15.705</td>
-                <td className="p-3">10.328</td>
-                <td className="p-3">0.00</td>
-                <td className="p-3">3.7916</td>
-                <td className="p-3">24.00</td>
-                <td className="p-3">24.00</td>
-                <td className="p-3">25.00</td>
-              </tr>
-              <tr>
-                <td className="p-3">FTHP</td>
-                <td className="p-3">714.0</td>
-                <td className="p-3">15.705</td>
-                <td className="p-3">10.328</td>
-                <td className="p-3">0.00</td>
-                <td className="p-3">3.7916</td>
-                <td className="p-3">24.00</td>
-                <td className="p-3">24.00</td>
-                <td className="p-3">25.00</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
   );
 };
+
+function formatDateString(input: string): string {
+  const datePattern = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+  if (!datePattern.test(input)) {
+      throw new Error("Input string is not in the correct format.");
+  }
+  const datePart = input.split(" ")[0];
+  return datePart;
+}

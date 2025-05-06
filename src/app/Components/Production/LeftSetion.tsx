@@ -1,8 +1,9 @@
 "use client"
 import { FormControl, MenuItem, Select, SelectChangeEvent, Typography } from "@mui/material";
-import { FileUploader } from "./FileUploader";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import useWellStore from "@/store/zustandState";
 
 interface Item {
   name: string;
@@ -18,24 +19,15 @@ interface ModelCardProps {
 export const LeftSetion: React.FC<any> = ({jsonExel, setjsonExel,dataTabel, setdataTabel}) => {
 
 
-  useEffect(() => {
-    localStorage.setItem("jsonExel", JSON.stringify(jsonExel));
-  }, [jsonExel]);
-
-  useEffect(() => {
-    localStorage.setItem("dataTabel", JSON.stringify(dataTabel));
-  }, [dataTabel,jsonExel]);
-
   const router = useRouter();
-  const [well, setwell] = useState<string>("SPH-02");
 
-  const goPage = (route: string) => {
-    router.push(`/${route}`);
-  };
+  const { well, updateWell } = useWellStore();
+
+
 
   const handleChange = (event: SelectChangeEvent) => {
     const selectedWell = event.target.value;
-    setwell(selectedWell);
+    updateWell(selectedWell);
 
     const data = jsonExel[selectedWell];
 
@@ -53,12 +45,17 @@ export const LeftSetion: React.FC<any> = ({jsonExel, setjsonExel,dataTabel, setd
       setdataTabel([]);
     }
   };
+
+  const goPage = (route: string) => {
+    router.push(`/${route}`);
+  };
   return (
     <div className="">
-      <FileUploader jsonExel={jsonExel} setjsonExel={setjsonExel} />
+      {/* <FileUploader jsonExel={jsonExel} setjsonExel={setjsonExel} /> */}
       <div className="mt-10 w-full space-y-10 mb-10 items-center">
         <div>
-          <Typography>Well Name</Typography>
+       
+          <p className="   font-bold text-xl">Well Name</p>
           <FormControl sx={{ minWidth: 200, mt: "5px" }} size="small">
             <Select labelId="demo-select-small-label" id="demo-select-small" value={well} onChange={handleChange}>
               {Object.keys(jsonExel).map((item) => (
@@ -81,10 +78,10 @@ export const LeftSetion: React.FC<any> = ({jsonExel, setjsonExel,dataTabel, setd
         </div>
       </div>
       <div className="p-0">
-        <h1 className="text-gray-500 font-bold mb-4">AI Models</h1>
+        <h1 className="text-gray-400 border-b-1 border-gray-200 font-bold text-xl mb-5" >AI Models</h1>
         <div className="flex space-x-20 items-start">
-          <ModelCard goPage={goPage} title="Autoregressive" items={[{ name: "ARIMA", route: "arima" }, { name: "AutoARIMA", route: "auto-arima" }, { name: "ARIMAX", route: "arima-x" }, { name: "Auto ARIMAX", route: "auto-arima-x" }]} />
-          <ModelCard goPage={goPage} title="Deep Learning" items={[{ name: "GRU", route: "gru" }, { name: "LSTM", route: "lstm" }, { name: "VAR", route: "var" }, { name: "CNN-LSTM", route: "cnn-lstm" }]} />
+          <ModelCard goPage={goPage} title="Autoregressive" items={[{ name: "ARIMA", route: "arima" }, { name: "AutoARIMA", route: "auto-arima" }, { name: "ARIMAX", route: "arima-x" }, { name: "Auto ARIMAX", route: "auto-arima-x" }, { name: "VAR", route: "var-model" }]} />
+          <ModelCard goPage={goPage} title="Deep Learning" items={[{ name: "GRU", route: "gru" }, { name: "LSTM", route: "lstm" }, { name: "CNN-LSTM", route: "cnn-lstm" }]} />
           <ModelCard goPage={goPage} title="Hybrid Models" items={[{ name: "DCA+GRU", route: "dca-gru" }]} />
         </div>
       </div>
