@@ -91,7 +91,6 @@ export interface TNewAutoArimaPostsX {
 
 export const declineCurveAnalysis = async (params: DeclineCurveParams) => {
   try {
-    console.log(params,"params")
     const response = await axios.post(`${API_BASE_URL}/decline_curve_analysis`,  params );
     return response.data;
   } catch (error) {

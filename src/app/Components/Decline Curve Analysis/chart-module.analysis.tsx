@@ -48,8 +48,6 @@ const ForecastChart: React.FC<ForecastChartProps> = ({ data }) => {
     return dataPoint;
   });
 
-  // Log formatted data to debug
-  console.log('Formatted Data:', formattedData);
 
   const colors=["#03fc1c","#cfd606","#0004ff","#73beff"]
 

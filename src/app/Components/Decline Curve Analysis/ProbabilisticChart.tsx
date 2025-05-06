@@ -15,9 +15,6 @@ interface ChartProps {
 
 const ProbabilisticChart: React.FC<ChartProps> = ({ data }) => {
   const { historical_fitted_rate ,historical_data_rate,P10,P50,P90} = data;
-  console.log('====================================');
-  console.log(data);
-  console.log('====================================');
 
   // Combine and transform data for plotting
   const combinedData = Object.keys({...history,...historical_fitted_rate,...historical_data_rate,...P10,...P50,...P90}).map(key => {

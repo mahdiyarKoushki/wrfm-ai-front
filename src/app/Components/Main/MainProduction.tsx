@@ -14,8 +14,6 @@ import Well_Production_Data from "../../../Well_Production_Data/data.json"
 export const MainProduction: React.FC<MainProductonProps> = ({ children }: MainProductonProps) => {
     const [jsonExel, setjsonExel] = useState<any>(Well_Production_Data);
     const [dataTabel, setdataTabel] = useState<any[]>(Well_Production_Data["SPH-04"]);
-console.log(Well_Production_Data);
-
 
 
     return (

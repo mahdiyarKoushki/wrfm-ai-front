@@ -92,7 +92,6 @@ export default function DeclineCurveAnalysis() {
   // }));
 const historical_data_rate= data?.data[well].historical_data_rate
 const historical_fitted_rate=data?.data[well].models[selectedModel].historical_fitted_rate
-// console.log(JSON.stringify(result, null, 2));
 
       setdataProbabilisticChart({
           P10:probabilistic.P10,

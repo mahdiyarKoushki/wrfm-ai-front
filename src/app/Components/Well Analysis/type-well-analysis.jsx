@@ -119,7 +119,6 @@ for (let i = 0; i < numberOfItems; i++) {
     transformedData.push(entry);
 }
 
-// console.log(transformedData,convertProbabilistic2);
 
 const maxLength = Math.max(transformedData.length, convertProbabilistic2.length);
 const mergedArray = [];
@@ -141,7 +140,6 @@ for (let i = 0; i < maxLength; i++) {
 }
 setDataHistoryChart(mergedArray)
 
-// console.log({mergedArray});
 
 
     } catch (err) {
