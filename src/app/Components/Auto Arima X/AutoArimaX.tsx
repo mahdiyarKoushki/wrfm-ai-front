@@ -256,7 +256,7 @@ export default function AutoArimaX() {
       )}
 
       {/* === Header === */}
-      <Header rout="/Prediction" title={"Auto ARIMA Algorithm"} />
+      <Header rout="/Prediction" title={"Auto ARIMAX Algorithm"} />
 
       {/* === Main Grid === */}
       <div className="h-200 grid grid-cols-6 lg:grid-cols-12 space-x-5">

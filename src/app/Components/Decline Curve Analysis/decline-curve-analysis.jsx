@@ -73,23 +73,18 @@ export default function DeclineCurveAnalysis() {
         {
           forecast:data?.data[well].models[selectedModel].forecast_rate,
         history:data?.data[well].historical_data_rate,
-        historical_fitted_rate:data?.data[well].models[selectedModel].historical_fitted_rate,
+        historicalFittedRate:data?.data[well].models[selectedModel].historical_fitted_rate,
       })
+      // historicalFittedRate, historicalDataRate 
       setdataCumulativeChart(
         {
           forecast:data?.data[well].models[selectedModel].forecast_cumulative,
           history:data?.data[well].historical_data_cumulative,
-          historical_fitted_rate: data?.data[well].historical_data_cumulative
+          historicalFittedRate: data?.data[well].historical_data_cumulative
         })
-      // historical_fitted_rate
+
       const probabilistic= data?.data[well].models[selectedModel].probabilistic_forecast_rate
-  //     const convertProbabilistic = Object.keys(probabilistic.P10)              // ["1.0","2.0",…, "728.0"]
-  // .sort((a,b)=>parseFloat(a)-parseFloat(b))        // ensure numeric order
-  // .map(k => ({
-  //   P10: probabilistic.P10[k],
-  //   P50: probabilistic.P50[k],
-  //   P90: probabilistic.P90[k]
-  // }));
+
 const historical_data_rate= data?.data[well].historical_data_rate
 const historical_fitted_rate=data?.data[well].models[selectedModel].historical_fitted_rate
 
@@ -110,8 +105,6 @@ const historical_fitted_rate=data?.data[well].models[selectedModel].historical_f
   const handleRunAnalysis = () => {
     handleDeclineAnalysis();
   };
-// const parameters= results[s].models selectedModel
-
 
 
 
@@ -303,7 +296,7 @@ const historical_fitted_rate=data?.data[well].models[selectedModel].historical_f
                           </TabsList>
                           <TabsContent value="Rate" className="pt-4">
                          
-                            <div className="h-[400px]">
+                            <div className="h-[380px]">
                           
                             <CustomLineChart data={dataRateChart} />
             
@@ -311,7 +304,7 @@ const historical_fitted_rate=data?.data[well].models[selectedModel].historical_f
                           </TabsContent>
                           <TabsContent value="Cumulative" className="pt-4">
                          
-                            <div className="h-[400px]">
+                            <div className="h-[380px]">
 
                             <CustomLineChart data={dataCumulativeChart} />
             
@@ -319,7 +312,7 @@ const historical_fitted_rate=data?.data[well].models[selectedModel].historical_f
                           </TabsContent>
                           <TabsContent value="Probabilistic" className="pt-4">
                          
-                            <div className="h-[400px]">
+                            <div className="h-[380px]">
                              <ProbabilisticChart data={dataProbabilisticChart}  title=""/>
             
                             </div>
@@ -329,7 +322,7 @@ const historical_fitted_rate=data?.data[well].models[selectedModel].historical_f
 
           </div>
 
-          <div className="w-100 mx-auto mt-20">
+          <div className="w-100 mx-auto mt-30">
             <h2 className="text-gray-400 font-bold mb-2">Analysis</h2>
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">

@@ -57,7 +57,7 @@ const ModelComparisonChartsModal: React.FC<ModelComparisonChartsModalProps> = ({
       handleDeclineAnalysis();
     }
   }, [isOpen]);
-console.log(allData);
+
 
   return (
     <div>

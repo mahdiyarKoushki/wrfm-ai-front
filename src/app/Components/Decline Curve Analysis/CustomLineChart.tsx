@@ -1,51 +1,44 @@
-import * as React from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine, ReferenceArea } from 'recharts';
+"use client"
+import React from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceArea } from 'recharts';
+import moment from 'moment';
 
-interface Data {
-  forecast: Record<number, number>;
-  history: Record<number, number>;
-  historical_fitted_rate: Record<number, number>;
-  historical_data_rate: Record<number, number>;
-  P10: Record<number, number>;
-  P50: Record<number, number>;
-  P90: Record<number, number>;
+interface ChartData {
+  forecast: Record<string, number>;
+  history: Record<string, number>;
+  historicalFittedRate: Record<string, number>;
+  historicalDataRate: Record<string, number>;
+  p10: Record<string, number>;
+  p50: Record<string, number>;
+  p90: Record<string, number>;
 }
 
 interface ChartProps {
-  data: Data;
+  data: ChartData;
 }
 
 const CustomLineChart: React.FC<ChartProps> = ({ data }) => {
-  const { forecast, history,historical_fitted_rate ,historical_data_rate,P10,P50,P90} = data;
+  const { forecast, history, historicalFittedRate, historicalDataRate } = data;
 
-  // Combine and transform data for plotting
-  const combinedData = Object.keys({...forecast,...history,historical_fitted_rate,historical_data_rate}).map(key => {
-    if (forecast) {
-      
-      return {
-        month: `Month ${key}`,
-        Forecast: forecast[parseInt(key)] && forecast[parseInt(key)],
-        History:  history[parseInt(key)] && history[parseInt(key)] ,
-        historical_fitted_rate: historical_fitted_rate && historical_fitted_rate[parseInt(key)],
-        historical_data_rate: historical_data_rate && historical_data_rate[parseInt(key)]
-      };
-    }else{
-      return {
-        month: `Month ${key}`,
-   
-        historical_fitted_rate: historical_fitted_rate && historical_fitted_rate[parseInt(key)],
-        historical_data_rate: historical_data_rate && historical_data_rate[parseInt(key)]
-      };
-    }
+  const combinedData = Object.keys({
+    ...forecast,
+    ...history,
+    ...historicalFittedRate,
+    ...historicalDataRate,
+  }).map((dateKey) => {
+    return {
+      date: dateKey,
+      forecast: forecast[dateKey] ?? null,
+      history: history[dateKey] ?? null,
+      historicalFittedRate: historicalFittedRate ? (historicalFittedRate[dateKey] ?? null) : null,
+      historicalDataRate: historicalDataRate ? (historicalDataRate[dateKey] ?? null) : null,
+    };
   });
 
-  const formatYAxis = (value: number) => {
-    return `${(value / 1000).toFixed(1)}  K`
-    // return `${value}`
-  }
+  const formatYAxis = (value: number) => `${(value / 1000).toFixed(1)} K`;
 
+  const confidenceInterval = 1;
 
-  const confidenceInterval = 1
   return (
     <LineChart
       width={800}
@@ -59,55 +52,22 @@ const CustomLineChart: React.FC<ChartProps> = ({ data }) => {
       }}
     >
       <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="" />
-      <YAxis  tickFormatter={formatYAxis}
-              domain={["dataMin", "dataMax"]}
-        />
-      <Tooltip />
+        <XAxis
+            dataKey="date"
+            tickFormatter={(tick) => moment(tick).format('MMM YYYY')}
+            label={{ value: "Date", position: "insideBottomRight", offset: -10 }}
+          />
+          <YAxis
+            tickFormatter={formatYAxis}
+            domain={["dataMin", "dataMax"]}
+            label={{ value: "Value (in K)", angle: -90 , offset: -15 , position: "insideLeft" }}
+          />
+      <Tooltip   />
       <Legend />
-      <Line
-            type="monotone"
-            dataKey="History"
-            stroke="green"
-            // width={3}
-            // strokeDasharray="5 5"
-            dot={false}
-            name="History"
-          />
-      <Line
-            type="monotone"
-            dataKey="historical_fitted_rate"
-            stroke="red"
-            // width={3}
-            // strokeDasharray="5 5"
-            dot={false}
-            name="History Fitted rate "
-          />
-      {/* <Line
-            type="monotone"
-            dataKey="historical_data_rate"
-            stroke="yellow"
-            // width={3}
-            // strokeDasharray="5 5"
-            dot={false}
-            name="History Fitted rate "
-          /> */}
-          
-
-{/* Confidence interval band */}
-<ReferenceArea y1={-confidenceInterval} y2={confidenceInterval} fill="#90caf9" fillOpacity={0.2} />
-
-       <Line
-            type="monotone"
-            dataKey="Forecast"
-            stroke="blue"
-            //  strokeDasharray="5 5"
-            dot={false}
-            name="Forecast"
-          />
-
-
-
+      <Line type="monotone" dataKey="history" stroke="green" dot={false} name="History" />
+      <Line type="monotone" dataKey="historicalFittedRate" stroke="red" dot={false} name="History Fitted Rate" />
+      <ReferenceArea y1={-confidenceInterval} y2={confidenceInterval} fill="#90caf9" fillOpacity={0.2} />
+      <Line type="monotone" dataKey="forecast" stroke="blue" dot={false} name="Forecast" />
     </LineChart>
   );
 };
