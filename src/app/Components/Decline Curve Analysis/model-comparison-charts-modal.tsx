@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { CSSProperties, useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { declineCurveAnalysis } from "@/api-client/api-client";
 import useWellStore from "@/store/zustandState";
@@ -12,6 +12,11 @@ interface ModelComparisonChartsModalProps {
   models: string[];
   days: string;
 }
+const override: CSSProperties = {
+  display: "block",
+  margin: "0 auto",
+  borderColor: "red",
+};
 
 interface ErrorsRateHistorical {
   MAE: number;
@@ -62,21 +67,21 @@ const ModelComparisonChartsModal: React.FC<ModelComparisonChartsModalProps> = ({
   return (
     <div>
       {loading && (
-        <div className="absolute inset-0 z-50 bg-white bg-opacity-80 flex items-center justify-center flex-col gap-5">
-          <MoonLoader color="#365ad8" loading={loading} size={150} />
+        <div className="absolute inset-0 z-50 bg-[#0f0f0f] bg-opacity-80 flex items-center justify-center flex-col gap-5">
+         <MoonLoader color="#AC7D0C" loading={loading} cssOverride={override} size={100} />
           <h2 className="font-bold">Data Loading, Please Wait...</h2>
         </div>
       )}
       {!loading && (
         <Dialog open={isOpen} onOpenChange={onClose}>
-          <DialogContent className="max-w-[calc(100%_-_100px)] h-[700px] p-0 gap-0">
+          <DialogContent className="max-w-[calc(100%_-_100px)] h-[700px] p-0 gap-0 bg-[#262626]">
             <DialogHeader className="p-6 pb-2">
-              <DialogTitle>Model Comparison Charts</DialogTitle>
+              <DialogTitle className="text-gray-50">Model Comparison Charts</DialogTitle>
             </DialogHeader>
             <div className="p-6 pt-2 grid grid-cols-2 md:grid-cols-3 gap-6">
               {/* Chart Section */}
               <div className="h-full col-span-2">
-                <p className="text-xs text-center mb-1">Well Histories with Percentiles</p>
+                <p className="text-xs text-center mb-1 text-amber-50">Well Histories with Percentiles</p>
                 <ChartModuleAnalysis data={allData} />
               </div>
               
@@ -86,7 +91,7 @@ const ModelComparisonChartsModal: React.FC<ModelComparisonChartsModalProps> = ({
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="bg-blue-600 text-white">
+                      <tr className="bg-[#AC7D0C] text-white">
                         <th className="py-2 px-4 text-center">Model</th>
                         <th className="py-2 px-4 text-center">MAE</th>
                         <th className="py-2 px-4 text-center">RMSE</th>
@@ -97,7 +102,7 @@ const ModelComparisonChartsModal: React.FC<ModelComparisonChartsModalProps> = ({
                       {Object.keys(allData).map((modelName) => {
                         const { MAE, RMSE, MAPE } = allData[modelName].errors_rate_historical || {};
                         return (
-                          <tr key={modelName} className="border-b">
+                          <tr key={modelName} className="border-b border-amber-50 bg-[#0f0f0f] text-amber-50">
                             <td className="px-4 py-2 text-center">{modelName}</td>
                             <td className="px-4 py-2 text-center">{MAE?.toFixed(2)}</td>
                             <td className="px-4 py-2 text-center">{RMSE?.toFixed(2)}</td>

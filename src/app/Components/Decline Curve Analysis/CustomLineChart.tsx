@@ -51,18 +51,30 @@ const CustomLineChart: React.FC<ChartProps> = ({ data }) => {
         bottom: 5,
       }}
     >
-      <CartesianGrid strokeDasharray="3 3" />
+      <CartesianGrid stroke='#afafaf20' />
         <XAxis
             dataKey="date"
             tickFormatter={(tick) => moment(tick).format('MMM YYYY')}
-            label={{ value: "Date", position: "insideBottomRight", offset: -10 }}
+           stroke='#fff'
+           strokeWidth={2}
+            label={{ value: "Date", position: "insideBottomRight", offset: -10 ,fill:"#fff"}}
           />
           <YAxis
             tickFormatter={formatYAxis}
+            stroke='#fff'
+            strokeWidth={2}
+            label={{ value: "Value (in K)", fill:"#fff"  ,angle: -90 , offset: -15 , position: "insideLeft" }}
             domain={["dataMin", "dataMax"]}
-            label={{ value: "Value (in K)", angle: -90 , offset: -15 , position: "insideLeft" }}
           />
-      <Tooltip   />
+     <Tooltip
+  contentStyle={{
+    backgroundColor: '#333', // Dark background
+    color: '#fff', // White text
+    border: '1px solid #555', // Optional: dark border
+    borderRadius: '4px', // Optional: rounded corners
+  }}
+  // itemStyle={{ color: '#fff' }} // Ensure legend items in tooltip are also white
+/>
       <Legend />
       <Line type="monotone" dataKey="history" stroke="green" dot={false} name="History" />
       <Line type="monotone" dataKey="historicalFittedRate" stroke="red" dot={false} name="History Fitted Rate" />

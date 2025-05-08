@@ -1,7 +1,7 @@
 // src/apiService.ts
 import axios from 'axios';
 
-const API_BASE_URL = 'http://172.22.31.155:3001'; // Adjust the base URL as needed
+const API_BASE_URL = 'http://172.22.31.151:3001'; // Adjust the base URL as needed
 
 export interface DeclineCurveParams {
   selected_wells:any;
@@ -34,9 +34,8 @@ export interface TArimaNew {
 
 export interface TArimaNewTWO {
   "well_name": string,
-  "var_target_col": string,
-  "var_lam": number,
-  "var_df": {},
+  "all_vars": string,
+  "forecast_horizon":number,
  "train_ratio": number,
    "order":string
 
@@ -76,6 +75,7 @@ export interface TNewAutoArimaPostsX {
   max_q:number,
   train_ratio:number,
   input_features: string[]
+  forecast_horizon:number
 
 }
 
@@ -145,7 +145,7 @@ export const NewArimaXPosts = async (params: TArimaNew) => {
     throw error;
   }
 };
-export const NewArimaXPostsStepTWO = async (params: TArimaNewXTWO) => {
+export const NewArimaXPostsStepTWO = async (params: TArimaNewTWO) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/arimax_analysis`, params );
     return response.data;

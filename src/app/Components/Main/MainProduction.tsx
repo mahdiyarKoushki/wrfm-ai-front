@@ -18,7 +18,7 @@ export const MainProduction: React.FC<MainProductonProps> = ({ children }: MainP
 
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 space-x-10 ">
+        <div className="grid grid-cols-1 lg:grid-cols-3 space-x-10 ">
             <LeftSection jsonExel={jsonExel} setjsonExel={setjsonExel} dataTabel={dataTabel} setdataTabel={setdataTabel} />
             <RightSection dataTabel={dataTabel} />
         </div>

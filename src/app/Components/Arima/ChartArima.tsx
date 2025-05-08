@@ -11,14 +11,9 @@ import {
   Legend,
   ChartData,
   ChartOptions,
-  Filler
+  Filler,
 } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
-
-interface Tprop {
-  title: string,
-  dataChart?: any
-}
 
 ChartJS.register(
   CategoryScale,
@@ -32,51 +27,71 @@ ChartJS.register(
   Filler
 );
 
-const AcfChart: React.FC<Tprop> = ({ title, dataChart }) => {
-  const { values, config } = dataChart;
+// Type definitions
+interface DataPoint {
+  values: number[];
+  config: [number, number][];
+}
 
-  const configLowerBound = config?.map((point: [number, number]) => point[0]);
-  const configUpperBound = config?.map((point: [number, number]) => point[1]);
+interface AcfChartProps {
+  title: string;
+  dataChart?: DataPoint;
+}
+
+// Constants for chart configuration
+const CHART_LABELS = Array.from({ length: 18 }, (_, i) => i.toString());
+const DARK_THEME = {
+  background: '#1f2937',
+  gridColor: 'rgba(255, 255, 255, 0.1)',
+  textColor: '#e5e7eb',
+  barColor: '#7DF9FF',
+  lineColor: '#FEE685',
+  boundColor: 'rgba(209, 213, 219, 0.5)',
+  boundFill: 'rgba(209, 213, 219, 0.3)',
+};
+
+const AcfChart: React.FC<AcfChartProps> = ({ title, dataChart }) => {
+  const values = dataChart?.values ?? [];
+  const configLowerBound = dataChart?.config?.map(([lower]) => lower) ?? [];
+  const configUpperBound = dataChart?.config?.map(([, upper]) => upper) ?? [];
 
   const data: ChartData<'bar' | 'line'> = {
-    labels: Array.from({ length: 18 }, (_, i) => i.toString()),
+    labels: CHART_LABELS,
     datasets: [
       {
-        type: 'line',
+        type: 'line' as const,
         data: values,
-        borderColor: 'green',
-        pointRadius: 6,
-        pointBackgroundColor: 'green',
+        borderColor: DARK_THEME.lineColor,
+        pointRadius: 4,
+        pointBackgroundColor: DARK_THEME.lineColor,
         showLine: false,
-   
       },
       {
-        type: 'bar',
+        type: 'bar' as const,
         data: values,
-        borderColor: 'black',
-        backgroundColor: '#000',
+        backgroundColor: DARK_THEME.barColor,
         borderWidth: 0,
         barPercentage: 0.5,
         categoryPercentage: 0.5,
       },
       {
-        type: 'line',
+        type: 'line' as const,
         data: configLowerBound,
-        borderColor: 'rgba(128, 128, 128, 0.5)', // Line color for lower bound (gray)
-        backgroundColor: 'rgba(128, 128, 128, 0.3)', // Gray area fill color
-        fill: '+1' // Fill area between this line and the next
+        borderColor: DARK_THEME.boundColor,
+        backgroundColor: DARK_THEME.boundFill,
+        fill: '+1',
       },
       {
-        type: 'line',
+        type: 'line' as const,
         data: configUpperBound,
-        borderColor: 'rgba(128, 128, 128, 0.5)', // Line color for upper bound (gray)
+        borderColor: DARK_THEME.boundColor,
       },
-     
-    ]
+    ],
   };
 
   const options: ChartOptions<'bar' | 'line'> = {
     responsive: true,
+    maintainAspectRatio: false, // Disable aspect ratio to allow full height
     plugins: {
       legend: {
         display: false,
@@ -84,6 +99,15 @@ const AcfChart: React.FC<Tprop> = ({ title, dataChart }) => {
       title: {
         display: true,
         text: title,
+        color: DARK_THEME.textColor,
+        font: {
+          size: 16,
+        },
+      },
+      tooltip: {
+        backgroundColor: DARK_THEME.background,
+        titleColor: DARK_THEME.textColor,
+        bodyColor: DARK_THEME.textColor,
       },
     },
     scales: {
@@ -91,21 +115,44 @@ const AcfChart: React.FC<Tprop> = ({ title, dataChart }) => {
         grid: {
           display: false,
         },
+        ticks: {
+          color: DARK_THEME.textColor,
+        },
         title: {
           display: true,
-          text: 'lag', // Add your x-axis title text here
-        }
+          text: 'Lag',
+          color: DARK_THEME.textColor,
+        },
       },
       y: {
         grid: {
-          display: true,
+          color: DARK_THEME.gridColor,
+        },
+        ticks: {
+          color: DARK_THEME.textColor,
         },
         beginAtZero: true,
-      }
-    }
+      },
+    },
   };
 
-  return <Chart type='bar' data={data} options={options} />;
+  return (
+    <div style={{ height: '370px', width: '100%' }}>
+      <Chart
+        style={{
+          height: '100%',
+          width: '100%',
+          background: '#262626',
+          borderRadius: '10px',
+          padding: '10px',
+          boxSizing: 'border-box',
+        }}
+        type="bar"
+        data={data}
+        options={options}
+      />
+    </div>
+  );
 };
 
 export default AcfChart;

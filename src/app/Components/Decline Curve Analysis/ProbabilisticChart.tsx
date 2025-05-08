@@ -62,18 +62,29 @@ const ProbabilisticChart: React.FC<ChartProps> = ({ data }) => {
         bottom: 20,
       }}
     >
-      <CartesianGrid strokeDasharray="3 3" />
+      <CartesianGrid stroke='#afafaf20' />
       <XAxis
         dataKey="date"
         tickFormatter={(tick) => moment(tick).format('MMM YYYY')}
-        label={{ value: "Date", position: "insideBottomRight", offset: -10 }}
+        label={{ value: "Date",fill:"#fff", position: "insideBottomRight", offset: -10 }}
+        stroke='#fff'
+        strokeWidth={2}
+        // label={{ value: "Value (in K)", fill:"#fff"  ,angle: -90 , offset: -15 , position: "insideLeft" }}
       />
       <YAxis
         tickFormatter={formatYAxis}
         domain={["dataMin", "dataMax"]}
-        label={{ value: "Value (in K)", angle: -90, position: "insideLeft" }}
+        stroke='#fff'
+        strokeWidth={2}
+        label={{ value: "Value (in K)", angle: -90,fill:"#fff",  position: "insideLeft" }}
       />
-      <Tooltip />
+         <Tooltip
+       contentStyle={{
+         backgroundColor: '#333', // Dark background
+         color: '#fff', // White text
+         border: '1px solid #555', // Optional: dark border
+         borderRadius: '4px', // Optional: rounded corners
+       }}/>
       <Legend />
       <Line type="monotone" dataKey="historicalFittedRate" stroke={colors.historicalFittedRate} dot={false} name="Historical Fitted Rate" />
       <Line type="monotone" dataKey="historicalDataRate" stroke={colors.historicalDataRate} dot={false} name="Historical Data Rate" />

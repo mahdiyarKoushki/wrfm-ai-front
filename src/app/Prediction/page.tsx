@@ -6,7 +6,7 @@ interface MainProductonProps {
   children?: ReactNode;
 }
 
-function page() {
+function Production() {
   return (
 <ProductionLayout>
 <Header rout="/" title={"Production Forecasting"}/>
@@ -16,7 +16,7 @@ function page() {
   )
 }
 
-export default page
+export default Production
 // 007a5e
 
 
@@ -25,5 +25,5 @@ export default page
 
 
 const ProductionLayout: React.FC<MainProductonProps> = ({children}: MainProductonProps) => {
-  return <div className=" container mx-auto ">{children}</div>
+  return <div className=" px-10 bg-[#0F0F0F] h-dvh ">{children}</div>
 }

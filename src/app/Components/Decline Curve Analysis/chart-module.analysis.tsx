@@ -41,26 +41,28 @@ const ForecastChart: React.FC<ForecastChartProps> = ({ data }) => {
   };
 
   // Prepare data for recharts
-  const formattedData = Array.from(allDateKeys).map((day) => {
-    const formattedDay = formatDate(day); // Apply formatDate here
-    const dataPoint: any = { day: formattedDay };
+  const formattedData = Array.from(allDateKeys)
+    .sort() // Sort dates to ensure chronological order
+    .map((day) => {
+      const formattedDay = formatDate(day);
+      const dataPoint: any = { day: formattedDay, year: formattedDay.split('-')[0] }; // Add year for secondary axis
 
-    Object.keys(data).forEach((modelKey) => {
-      const modelData = data[modelKey];
+      Object.keys(data).forEach((modelKey) => {
+        const modelData = data[modelKey];
 
-      // Only add forecast if the value is not null
-      if (modelData?.forecast_rate[day] != null) {
-        dataPoint[`${modelKey}_forecast`] = modelData.forecast_rate[day];
-      }
+        // Only add forecast if the value is not null
+        if (modelData?.forecast_rate[day] != null) {
+          dataPoint[`${modelKey}_forecast`] = modelData.forecast_rate[day];
+        }
 
-      // Only add historical if the value is not null
-      if (modelData?.historical_fitted_rate[day] != null) {
-        dataPoint[`${modelKey}_historical`] = modelData.historical_fitted_rate[day];
-      }
+        // Only add historical if the value is not null
+        if (modelData?.historical_fitted_rate[day] != null) {
+          dataPoint[`${modelKey}_historical`] = modelData.historical_fitted_rate[day];
+        }
+      });
+
+      return dataPoint;
     });
-
-    return dataPoint;
-  });
 
   const colors = [
     '#03fc1c',
@@ -78,49 +80,81 @@ const ForecastChart: React.FC<ForecastChartProps> = ({ data }) => {
   ];
 
   const formatYAxis = (value: number) => `${(value / 1000).toFixed(1)} K`;
+  const formatYearAxis = (year: string) => year;
+
+  // Extract unique years for the secondary X-axis
+  const uniqueYears = Array.from(new Set(formattedData.map((d) => d.year as string))).sort();
+
+  // Generate ticks for the primary X-axis to avoid duplicates (e.g., show every 3rd month)
+  const tickInterval = Math.ceil(formattedData.length / 10); // Adjust based on data density
+  const primaryTicks = formattedData
+    .filter((_, index) => index % tickInterval === 0)
+    .map((d) => d.day);
 
   return (
-  <div className='p-5'> 
-      <ResponsiveContainer style={{marginBottom:"10px",padding:"10px"}} width="100%" height={550}>
-      <LineChart data={formattedData}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis
-          dataKey="day" // Changed from "date" to "day"
-          tickFormatter={(tick) => moment(tick).format('MMM YYYY')}
-          label={{ value: 'Date', position: 'insideBottom', offset: -5}}
-        />
-        <YAxis
-          tickFormatter={formatYAxis}
-          domain={['dataMin', 'dataMax']}
-          label={{ value: 'Value (in K)', angle: -90, position: 'insideLeft' }}
-        />
-        <Tooltip />
-        <Legend verticalAlign="top" height={36} />
-        {Object.keys(data).map((modelKey, index) => (
-          <Line
-            key={`${modelKey}_forecast`}
-            type="monotone"
-            dataKey={`${modelKey}_forecast`}
-            name={`Forecast Rate (${modelKey})`}
-            stroke={colors[index % colors.length]} // Ensure color cycling
-            activeDot={{ r: 8 }}
-            dot={false}
+    <div className="p-5 bg">
+      <ResponsiveContainer style={{ marginBottom: '10px', padding: '10px' }} width="100%" height={550}>
+        <LineChart data={formattedData}>
+          <CartesianGrid stroke="#a1a1a120" />
+          <XAxis
+            dataKey="day"
+            tickFormatter={(tick) => moment(tick).format('MMM YYYY')}
+            stroke="#fff"
+            strokeWidth={2}
+            label={{ value: '', position: 'insideBottom', offset: -5, fill: '#fff' }}
+            ticks={primaryTicks} // Use filtered ticks to avoid duplicates
+            interval={0} // Ensure all specified ticks are shown
           />
-        ))}
-        {Object.keys(data).map((modelKey, index) => (
-          <Line
-            key={`${modelKey}_historical`}
-            type="monotone"
-            dataKey={`${modelKey}_historical`}
-            name={`Historical Fitted Rate (${modelKey})`}
-            stroke={colors[index % colors.length]} // Ensure color cycling
-            dot={true}
+          <XAxis
+            dataKey="year"
+            xAxisId="year"
+            tickFormatter={formatYearAxis}
+            ticks={uniqueYears} // Only show unique years
+            tick={{ fill: '#ffffff', fontSize: 12, fontWeight: 600 }}
+            stroke="#ffff"
+            label={{ value: 'Year', position: 'insideBottom', offset: -20, fill: '#fff' }}
+            interval={0} // Show all year ticks
           />
-        ))}
-      </LineChart>
-    </ResponsiveContainer>
-  </div>
-  
+          <YAxis
+            stroke="#fff"
+            strokeWidth={2}
+            tickFormatter={formatYAxis}
+            domain={['dataMin', 'dataMax']}
+            label={{ value: 'Value (in K)', angle: -90, position: 'insideLeft', fill: '#fff' }}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: '#333',
+              color: '#fff',
+              border: '1px solid #555',
+              borderRadius: '4px',
+            }}
+          />
+          <Legend verticalAlign="top" height={36} />
+          {Object.keys(data).map((modelKey, index) => (
+            <Line
+              key={`${modelKey}_forecast`}
+              type="monotone"
+              dataKey={`${modelKey}_forecast`}
+              name={`Forecast Rate (${modelKey})`}
+              stroke={colors[index % colors.length]}
+              activeDot={{ r: 8 }}
+              dot={false}
+            />
+          ))}
+          {Object.keys(data).map((modelKey, index) => (
+            <Line
+              key={`${modelKey}_historical`}
+              type="monotone"
+              dataKey={`${modelKey}_historical`}
+              name={`Historical Fitted Rate (${modelKey})`}
+              stroke={colors[index % colors.length]}
+              dot={true}
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
 

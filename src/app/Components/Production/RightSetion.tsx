@@ -49,28 +49,29 @@ export const RightSection: React.FC<RightSectionProps> = ({ dataTabel }) => {
   const handlePageChange = (pageNumber: number) => setCurrentPage(pageNumber);
 
   return (
-    <div className="container mx-auto py-6 px-4">
-      <Tabs defaultValue="table" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-md mb-6 ml-40">
-          <TabsTrigger
-            value="table"
-            className="text-blue-600 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none"
-          >
-            Table
-          </TabsTrigger>
+    <div className=" col-span-2  py-6 px-4 bg-[#262626] p-5 rounded-2xl">
+      <Tabs defaultValue="chart" className="w-full ">
+        <TabsList className="grid w-full grid-cols-2 ">
+     
           <TabsTrigger
             value="chart"
-            className="text-gray-400 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none"
+            className="text-gray-400 data-[state=active]:text-[#ac7d0c] data-[state=active]:border-b-2 data-[state=active]:border-[#ac7d0c] rounded-none"
           >
             Chart
           </TabsTrigger>
+          <TabsTrigger
+            value="table"
+            className="text-[#ac7d0c] data-[state=active]:text-[#ac7d0c] data-[state=active]:border-b-2 data-[state=active]:border-[#ac7d0c] rounded-none"
+          >
+            Table
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="table" className="space-y-8">
-          <div className="overflow-x-auto">
+        <TabsContent value="table" className="">
+          <div className="overflow-x-auto  " >
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-blue-600 text-white">
+                <tr className="bg-[#ac7d0c] text-white">
                   <th className="p-3 text-center">#</th>
                   <th className="p-3 text-center">Date</th>
                   <th className="p-3 text-center">Choke (1/64")</th>
@@ -80,7 +81,7 @@ export const RightSection: React.FC<RightSectionProps> = ({ dataTabel }) => {
               </thead>
               <tbody>
                 {currentItems.map((row: DataRow, index: number) => (
-                  <tr key={index} className={index % 2 === 1 ? "bg-gray-50" : "bg-white"}>
+                  <tr key={index} className={index % 2 === 1 ? "bg-[#262626] text-white" : "bg-[#5b5b5b20] text-white"}>
                     <td className="p-3 text-center">{indexOfFirstItem + index + 1}</td>
                     <td className="p-3 text-center">{formatDateString(row.Date)}</td>
                     <td className="p-3 text-center">{row.Choke}</td>
@@ -114,7 +115,7 @@ const Pagination: React.FC<{
   onPageChange: (page: number) => void;
   pageNumbers: number[];
 }> = ({ currentPage, totalPages, onPageChange, pageNumbers }) => (
-  <div className="flex justify-center items-center gap-2">
+  <div className="flex justify-center items-center gap-2 text-[#AC7D0C]">
     <Button
       variant="outline"
       size="icon"

@@ -16,9 +16,6 @@ import {
   type ChartOptions,
 } from "chart.js"
 import { Line } from "react-chartjs-2"
-import { CardContent,Card } from "../ui/card"
-// import { Card, CardContent } from "@/components/ui/card"
-
 
 // Register Chart.js components
 ChartJS.register(
@@ -30,10 +27,10 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler,
+  Filler
 )
 
-// Define the data type
+// Define data types
 interface DataPoint {
   P10: number
   P50: number
@@ -44,25 +41,23 @@ interface DataPoint {
 }
 
 interface ProductionChartProps {
-  data: DataPoint[],
-  selectedModel:string
+  data: DataPoint[]
+  selectedModel: string
 }
 
-export default function ProductionAnalysisChart({ data ,selectedModel}: ProductionChartProps) {
+export default function ProductionAnalysisChart({ data, selectedModel }: ProductionChartProps) {
   const chartRef = useRef<any>(null)
-  const [chartData, setChartData] = useState<ChartData<"line">>({ datasets: [] })
+  const [chartData, setChartData] = useState<ChartData<"line">>({ datasets: [], labels: [] })
   const [chartOptions, setChartOptions] = useState<ChartOptions<"line">>({})
 
   useEffect(() => {
     if (!data || data.length === 0) return
 
-    // Create labels (indices)
     const labels = Array.from({ length: data.length }, (_, i) => i)
 
     setChartData({
       labels,
       datasets: [
-        // Area dataset for G10-G90 range
         {
           label: "P10-P90 Range",
           data: data.map((item) => item.G10),
@@ -72,7 +67,6 @@ export default function ProductionAnalysisChart({ data ,selectedModel}: Producti
           fill: false,
           order: 7,
         },
-        // G10 line
         {
           label: "P10",
           data: data.map((item) => item.G10),
@@ -84,7 +78,6 @@ export default function ProductionAnalysisChart({ data ,selectedModel}: Producti
           fill: false,
           order: 5,
         },
-        // G50 line
         {
           label: "P50",
           data: data.map((item) => item.G50),
@@ -96,7 +89,6 @@ export default function ProductionAnalysisChart({ data ,selectedModel}: Producti
           fill: false,
           order: 4,
         },
-        // G90 line
         {
           label: "P90",
           data: data.map((item) => item.G90),
@@ -105,11 +97,10 @@ export default function ProductionAnalysisChart({ data ,selectedModel}: Producti
           borderDash: [5, 5],
           pointRadius: 0,
           tension: 0.1,
-          fill: "-3", // This fills between G90 and G10 lines
+          fill: "-3",
           backgroundColor: "rgba(200, 200, 200, 0.5)",
           order: 3,
         },
-        // P10 line
         {
           label: `P10 ${selectedModel} fit`,
           data: data.map((item) => item.P10),
@@ -120,9 +111,8 @@ export default function ProductionAnalysisChart({ data ,selectedModel}: Producti
           fill: false,
           order: 2,
         },
-        // P50 line
         {
-            label: `P50 ${selectedModel} fit`,
+          label: `P50 ${selectedModel} fit`,
           data: data.map((item) => item.P50),
           borderColor: "rgba(0, 128, 0, 1)",
           borderWidth: 2,
@@ -131,9 +121,8 @@ export default function ProductionAnalysisChart({ data ,selectedModel}: Producti
           fill: false,
           order: 1,
         },
-        // P90 line
         {
-            label: `P90 ${selectedModel} fit`,
+          label: `P90 ${selectedModel} fit`,
           data: data.map((item) => item.P90),
           borderColor: "rgba(0, 0, 255, 1)",
           borderWidth: 2,
@@ -150,74 +139,88 @@ export default function ProductionAnalysisChart({ data ,selectedModel}: Producti
       maintainAspectRatio: false,
       scales: {
         x: {
+          
           title: {
             display: true,
+            color: "#ffffff", // Color labels white
+         
             text: "Index",
+            font: {
+              weight: "bold", // Bold axis title
+            },
           },
           grid: {
             display: true,
-            color: "rgba(200, 200, 200, 0.3)",
+            color: "rgba(200, 200, 200, 0.1)",
+          },
+          ticks: {
+            color: "#ffffff", // Color labels white
+            font: {
+              weight: "bold", // Bold axis labels
+            },
           },
         },
         y: {
-          min: 2000,
-          max: 7000,
+         
           title: {
             display: true,
             text: "Value",
+            color: "#ffffff", // Color labels white
+          
+            font: {
+              weight: "bold", // Bold axis title
+            },
           },
           ticks: {
-            callback: (value) => `${(Number(value)).toFixed(0)}`,
+            callback: (value) => `${Number(value).toFixed(0)}`,
+
+            color: "#ffffff", // Color labels white
+            font: {
+              weight: "bold", // Bold axis labels
+            },
           },
           grid: {
             display: true,
-            color: "rgba(200, 200, 200, 0.3)",
+            color: "rgba(200, 200, 200, 0.1)",
           },
         },
       },
       plugins: {
         legend: {
-          position: "bottom" as const,
-          align: "end" as const,
+          position: "bottom",
+          align: "end",
           labels: {
             usePointStyle: false,
             boxWidth: 16,
             boxHeight: 16,
             padding: 15,
-            font: {
-              size: 10,
-            },
+            font: { size: 10 },
           },
         },
         tooltip: {
-          backgroundColor: "rgba(255, 255, 255, 0.9)",
-          titleColor: "#000",
-          bodyColor: "#000",
-          borderColor: "rgba(0, 0, 0, 0.1)",
+          backgroundColor: "rgba(30, 30, 30, 0.9)",
+          titleColor: "#ffffff",
+          bodyColor: "#ffffff",
+          borderColor: "rgba(255, 255, 255, 0.2)",
           borderWidth: 1,
           padding: 10,
           displayColors: true,
           callbacks: {
             label: (context) => {
-              const label = context.dataset.label || ""
-              const value = context.parsed.y
-              return `${label}: ${value.toFixed(2)}`
+              const label = context.dataset.label || "";
+              const value = context.parsed.y;
+              return `${label}: ${value.toFixed(2)}`;
             },
             title: (tooltipItems) => `Index: ${tooltipItems[0].label}`,
           },
         },
-     
       },
-    })
-  }, [data])
+    });
+  }, [data, selectedModel])
 
   return (
-    <Card className="w-full border-0 shadow-amber-50 ">
-      <CardContent className="pt-6 border-0">
-        <div className="h-[400px] ">
-          <Line style={{border:"none"}} ref={chartRef} options={chartOptions} data={chartData} />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="h-[400px]">
+      <Line ref={chartRef} options={chartOptions} data={chartData} />
+    </div>
   )
 }

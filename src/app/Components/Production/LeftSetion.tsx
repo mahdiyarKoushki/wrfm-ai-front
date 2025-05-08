@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { FormControl, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { useRouter } from "next/navigation";
 import useWellStore from "@/store/zustandState";
+import SelectInputMUI from '../ui/SelectInputMUI';
+
 
 interface Item {
   name: string;
@@ -45,27 +47,24 @@ export const LeftSection: React.FC<any> = ({ jsonExel, setdataTabel }) => {
   };
 
   return (
-    <div>
-      <div className="mt-10 w-full space-y-10 mb-10 items-center">
+    <div className='bg-[#262626] p-5 rounded-2xl'>
+      <div className="mt-10 w-full space-y-10 mb-10 items-center ">
         <div>
-          <p className="font-bold text-xl mb-2">Well Name</p>
-          <FormControl sx={{ minWidth: 200, mt: '5px' }} size="small">
-            <Select
-              labelId="select-well-label"
-              id="select-well"
+          <p className="font-bold text-xl mb-4 text-gray-200">Well Name</p>
+         
+          <SelectInputMUI     label=''
+              items={Object.keys(jsonExel).map(item=>{
+                return {name:item ,value:item}
+              })}
+              width={200}
               value={well}
-              onChange={handleChange}
-            >
-              {Object.keys(jsonExel).map((item) => (
-                <MenuItem key={item} value={item}>
-                  {item}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              onChange={handleChange} dark={true} 
+          // onChange={handleDarkChange} items={selectTheme} value={isLight ? 1 : 0} 
+          />
+
         </div>
 
-        <div className="flex-col justify-between flex">
+        {/* <div className="flex-col justify-between flex">
           <p className="text-gray-400 border-b-1 mb-8 p-5 border-gray-200 font-bold text-xl">Analysis</p>
           <div className="flex justify-between">
             <button onClick={() => router.push("/well-analysis")} className="rounded-md w-45 h-12 bg-amber-400 cursor-pointer">
@@ -75,27 +74,34 @@ export const LeftSection: React.FC<any> = ({ jsonExel, setdataTabel }) => {
               DCA Analysis
             </button>
           </div>
-        </div>
+        </div> */}
       </div>
 
       <div className="p-0">
-        <h1 className="text-gray-400 border-b-1 border-gray-200 font-bold text-xl mb-8 p-5">AI Models</h1>
-        <div className="flex space-x-20 items-start">
-          <ModelCard onNavigate={onNavigate} title="Autoregressive" items={[
+        <h1 className="text-gray-300 border-b-1 border-gray-200 font-bold text-xl mb-8 p-5">AI Models</h1>
+        <div className="items-start grid grid-cols-2 space-y-0">
+       
+       
+             <ModelCard onNavigate={onNavigate} title="Machine Learning" items={[
             { name: "ARIMA", route: "arima" },
             { name: "AutoARIMA", route: "auto-arima" },
             { name: "ARIMAX", route: "arima-x" },
             { name: "Auto ARIMAX", route: "auto-arima-x" },
             { name: "VAR", route: "var-model" }
           ]} />
-          <ModelCard onNavigate={onNavigate} title="Deep Learning" items={[
+   <div className='flex flex-col  gap-2'>
+   <ModelCard onNavigate={onNavigate} title="Deep Learning" items={[
             { name: "GRU", route: "gru" },
             { name: "LSTM", route: "lstm" },
             { name: "CNN-LSTM", route: "cnn-lstm" }
           ]} />
+          <span></span>
+        
           <ModelCard onNavigate={onNavigate} title="Hybrid Models" items={[
             { name: "DCA+GRU", route: "dca-gru" }
           ]} />
+   </div>
+          
         </div>
       </div>
     </div>
@@ -104,10 +110,10 @@ export const LeftSection: React.FC<any> = ({ jsonExel, setdataTabel }) => {
 
 const ModelCard: React.FC<ModelCardProps> = ({ title, items, onNavigate }) => (
   <div className="border-1 rounded-lg w-50 border-gray-300 h-auto overflow-hidden ">
-    <h2 className="font-semibold  border-gray-300 border-b text-center p-1.5 bg-gray-100">{title}</h2>
+    <h2 className="font-semibold text-gray-950 border-gray-300 border-b text-center p-1.5 bg-gray-100">{title}</h2>
     <ul>
       {items.map((item, index) => (
-        <li key={index} onClick={() => onNavigate(item.route)} className="border-t text-sm py-1 pl-10 border-gray-100 cursor-pointer hover:bg-gray-200">
+        <li key={index} onClick={() => onNavigate(item.route)} className="border-t text-sm py-1 pl-10 text-gray-100 border-gray-100 cursor-pointer hover:text-black hover:bg-gray-200">
           {item.name}
         </li>
       ))}
